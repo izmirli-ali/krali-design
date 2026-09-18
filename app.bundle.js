@@ -1,4 +1,4 @@
-// KRALI 100 YILLIK DENEYİM v0.11.11 — single-file runtime bundle
+// KRALI 100 YILLIK DENEYİM v0.11.12 — single-file runtime bundle
 (function () {
   const style = document.createElement("style");
   style.textContent = `* { box-sizing: border-box; }
@@ -2618,10 +2618,6 @@ async function applySafePreset(key) {
   lastSafePreset = key;
   guidesVisible = true;
 
-  document.querySelectorAll("[data-scale-preset]").forEach(btn => {
-  btn.addEventListener("click", () => guarded(() => applyScalePreset(btn.dataset.scalePreset)));
-});
-
 document.querySelectorAll("[data-safe]").forEach(btn => {
     btn.classList.toggle("active", btn.dataset.safe === key);
   });
@@ -2994,7 +2990,7 @@ async function runAssistant() {
 }
 
 
-const CURRENT_VERSION = "0.11.11";
+const CURRENT_VERSION = "0.11.12";
 
 const UPDATE_FILES = ["app.bundle.js"];
 
@@ -3182,6 +3178,13 @@ document.getElementById("updatePlugin").addEventListener("click", () => guarded(
 const refreshDocBtn = document.getElementById("refreshDoc");
 if (refreshDocBtn) refreshDocBtn.addEventListener("click", () => guarded(refreshDocInfo));
 
+// Ölçek presetleri yalnızca panel açılışında bağlanır. Bunları Safe Zone
+// fonksiyonuna bağlamak, ilk tıklamayı boşa çıkarır ve her Safe Zone
+// kullanımında dinleyicileri çoğaltır.
+document.querySelectorAll("[data-scale-preset]").forEach(btn => {
+  btn.addEventListener("click", () => guarded(() => applyScalePreset(btn.dataset.scalePreset)));
+});
+
 document.querySelectorAll("[data-safe]").forEach(btn => {
   btn.addEventListener("click", () => guarded(() => applySafePreset(btn.dataset.safe)));
 });
@@ -3227,14 +3230,18 @@ function runUiSelfCheck() {
   const missing = requiredIds.filter(id => !document.getElementById(id));
   const scaleCount = document.querySelectorAll("[data-scale-preset]").length;
   const safeCount = document.querySelectorAll("[data-safe]").length;
+  const alignPoints = Array.from(document.querySelectorAll("[data-align-point]"))
+    .map(btn => btn.dataset.alignPoint);
+  const expectedAlignPoints = ["tl", "tc", "tr", "ml", "mc", "mr", "bl", "bc", "br"];
+  const invalidAlignPoints = expectedAlignPoints.filter(point => alignPoints.filter(value => value === point).length !== 1);
 
-  if (missing.length || scaleCount !== 4 || safeCount !== 6) {
-    console.error("KRALI UI self-check failed", { missing, scaleCount, safeCount });
-    setStatus("UI kontrol hatası • eksik: " + missing.join(", "));
+  if (missing.length || scaleCount !== 4 || safeCount !== 6 || invalidAlignPoints.length) {
+    console.error("KRALI UI self-check failed", { missing, scaleCount, safeCount, alignPoints, invalidAlignPoints });
+    setStatus("UI kontrol hatası • eksik: " + [...missing, ...invalidAlignPoints].join(", "));
     return false;
   }
 
-  console.log("KRALI UI self-check OK", { controls: requiredIds.length, scaleCount, safeCount });
+  console.log("KRALI UI self-check OK", { controls: requiredIds.length, scaleCount, safeCount, alignPoints });
   return true;
 }
 
@@ -3244,4 +3251,3 @@ const runtimeVersionEl = document.querySelector(".version");
 if (runtimeVersionEl) runtimeVersionEl.textContent = "v" + CURRENT_VERSION;
 setStatus("KRALI 100 YILLIK DENEYİM v" + CURRENT_VERSION + " hazır");
 initMemory();
-

@@ -2,6 +2,12 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
+### v0.11.12 — Ölçek preset bağlantısı ve arayüz denetimi
+- 9:16, 4:5, 1:1 ve 16:9 canvas presetleri artık panel açılışında yalnızca bir kez bağlanır.
+- Safe Zone çalıştırılırken tekrar tekrar event listener eklenmesine neden olan yanlış bağlantı kaldırıldı.
+- UI self-check artık 4 ölçek, 6 Safe Zone ve 9 hizalama noktasının her birini denetler.
+- Photoshop açmadan statik denetim için: `python3 scripts/self-check.py`
+
 ### v0.11.11 — Hizalama yön sırası düzeltmesi
 - 3×3 hizalama matrisi tek flex-wrap yerine 3 ayrı satıra ayrıldı.
 - Her satır `direction:ltr` ile Sol → Orta → Sağ sırasına sabitlendi.

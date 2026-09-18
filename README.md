@@ -2,6 +2,13 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
+### v0.11.10 — Kompakt 3×3 hizalama
+- Yerleşim yön kontrolleri 9 adet gerçek kare butondan oluşan kompakt 3×3 matrise çevrildi.
+- Matris yaklaşık 104 px genişliğinde ve ortalanmış şekilde gösterilir.
+- Her hücre 28×28 px; merkez hücre ayrı vurguya sahiptir.
+- Hizalama fonksiyonları değişmedi, yalnızca görünüm daha kompakt hale getirildi.
+
+
 ### v0.11.9 — Yerleşim sadeleştirme
 - Layer bölümü arayüzden tamamen kaldırıldı.
 - Yerleşim bölümü 3×3 hizalama pedi + Fit + Fill olacak şekilde sadeleştirildi.

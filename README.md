@@ -2,6 +2,16 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
+### v0.11.1 — Scale + Safe Zone switch fix
+- Ölçek presetleri artık yalnızca canvas kesmek yerine belgeyi oranı bozmadan hedef alanı dolduracak şekilde ölçekler ve sonra hedef canvas'a ortadan kırpar.
+- İşlem sonunda hedef ölçü doğrulanır; başarısızsa hata gösterilir.
+- Safe Zone `Göster/Gizle` ve `Temizle` butonları kaldırıldı.
+- Yerine tek bir kaliteli switch eklendi.
+- Switch kapalıyken guide'lar silinir; tekrar açıldığında son seçili Safe Zone preset yeniden uygulanır.
+- Safe Zone preset seçildiğinde switch otomatik açılır.
+- Ölçek değişirse ve Safe Zone açıksa seçili preset yeni ölçüye göre otomatik yeniden hesaplanır.
+
+
 ### v0.11.0 — Scale presets + Safe Zone stabilization
 - Panelin en üstüne 9:16, 4:5, 1:1 ve 16:9 küçük ölçek preset kutuları eklendi.
 - Ölçek presetleri canvas'ı sırasıyla 1080×1920, 1080×1350, 1080×1080 ve 1920×1080 ölçülerine geçirir.

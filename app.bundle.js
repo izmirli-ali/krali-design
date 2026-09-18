@@ -1,4 +1,4 @@
-// KRALI 100 YILLIK DENEYİM v0.11.10 — single-file runtime bundle
+// KRALI 100 YILLIK DENEYİM v0.11.11 — single-file runtime bundle
 (function () {
   const style = document.createElement("style");
   style.textContent = `* { box-sizing: border-box; }
@@ -1545,7 +1545,7 @@ input[type="checkbox"] {
 
   const v0119Style = document.createElement("style");
   v0119Style.textContent = `
-    /* v0.11.10 simple placement */
+    /* v0.11.11 simple placement */
     .alignGrid{display:none !important}
     .alignPad{
       display:flex !important;
@@ -1584,7 +1584,7 @@ input[type="checkbox"] {
 
   const v01110Style = document.createElement("style");
   v01110Style.textContent = `
-    /* v0.11.10 compact 3x3 align pad */
+    /* v0.11.11 compact 3x3 align pad */
     .alignPad{
       width:104px !important;
       display:flex !important;
@@ -1626,6 +1626,44 @@ input[type="checkbox"] {
   document.head.appendChild(v01110Style);
 
 
+  const v01111Style = document.createElement("style");
+  v01111Style.textContent = `
+    /* v0.11.11 fixed align order */
+    .alignPad{
+      width:104px !important;
+      display:block !important;
+      direction:ltr !important;
+      margin:7px auto 8px !important;
+      padding:4px !important;
+    }
+    .alignRow{
+      width:100% !important;
+      display:flex !important;
+      flex-direction:row !important;
+      direction:ltr !important;
+      justify-content:flex-start !important;
+      gap:4px !important;
+      margin:0 0 4px 0 !important;
+      padding:0 !important;
+    }
+    .alignRow:last-child{
+      margin-bottom:0 !important;
+    }
+    .alignRow button{
+      flex:0 0 28px !important;
+      width:28px !important;
+      min-width:28px !important;
+      max-width:28px !important;
+      height:28px !important;
+      min-height:28px !important;
+      max-height:28px !important;
+      order:initial !important;
+    }
+  `;
+  document.head.appendChild(v01111Style);
+
+
+
 
 
 
@@ -1644,7 +1682,7 @@ input[type="checkbox"] {
       <div class="topActions">
         <button id="placeAssetTop" class="assetTopBtn" title="Dosyadan Asset Ekle">📁</button>
         <button id="updatePlugin" class="updateBtn">↻ Güncelle</button>
-        <div class="version">v0.11.10</div>
+        <div class="version">v0.11.11</div>
       </div>
     </header>
 
@@ -1700,16 +1738,22 @@ input[type="checkbox"] {
         </label>
       </div>
 
-      <div class="alignPad">
-        <button data-align-point="tl" title="Sol Üst">↖</button>
-        <button data-align-point="tc" title="Üst Orta">↑</button>
-        <button data-align-point="tr" title="Sağ Üst">↗</button>
-        <button data-align-point="ml" title="Sol Orta">←</button>
-        <button data-align-point="mc" class="alignCenter" title="Tam Ortala">•</button>
-        <button data-align-point="mr" title="Sağ Orta">→</button>
-        <button data-align-point="bl" title="Sol Alt">↙</button>
-        <button data-align-point="bc" title="Alt Orta">↓</button>
-        <button data-align-point="br" title="Sağ Alt">↘</button>
+      <div class="alignPad" dir="ltr">
+        <div class="alignRow">
+          <button data-align-point="tl" title="Sol Üst">↖</button>
+          <button data-align-point="tc" title="Üst Orta">↑</button>
+          <button data-align-point="tr" title="Sağ Üst">↗</button>
+        </div>
+        <div class="alignRow">
+          <button data-align-point="ml" title="Sol Orta">←</button>
+          <button data-align-point="mc" class="alignCenter" title="Tam Ortala">•</button>
+          <button data-align-point="mr" title="Sağ Orta">→</button>
+        </div>
+        <div class="alignRow">
+          <button data-align-point="bl" title="Sol Alt">↙</button>
+          <button data-align-point="bc" title="Alt Orta">↓</button>
+          <button data-align-point="br" title="Sağ Alt">↘</button>
+        </div>
       </div>
 
       <div class="buttonRow two placementScaleRow">
@@ -2631,6 +2675,21 @@ async function alignSelected(axis) {
   setStatus(axis === "h" ? "✓ Yatay ortalandı" : axis === "v" ? "✓ Dikey ortalandı" : "✓ Tam ortalandı");
 }
 
+function alignPointLabel(point) {
+  const labels = {
+    tl: "Sol Üst",
+    tc: "Üst Orta",
+    tr: "Sağ Üst",
+    ml: "Sol Orta",
+    mc: "Merkez",
+    mr: "Sağ Orta",
+    bl: "Sol Alt",
+    bc: "Alt Orta",
+    br: "Sağ Alt"
+  };
+  return labels[point] || point;
+}
+
 async function alignLayerToPoint(point) {
   await modal("9 Nokta Hizala", async () => {
     const doc = getDoc();
@@ -2671,7 +2730,7 @@ async function alignLayerToPoint(point) {
     await layer.translate(target[0] - b.left, target[1] - b.top);
   });
 
-  setStatus("✓ Layer hizalandı" + (document.getElementById("safeAlignMargin")?.checked ? " • %5 pay" : ""));
+  setStatus("✓ " + alignPointLabel(point) + (document.getElementById("safeAlignMargin")?.checked ? " • %5 pay" : ""));
 }
 
 async function distributeSelectedLayers(axis) {
@@ -2935,7 +2994,7 @@ async function runAssistant() {
 }
 
 
-const CURRENT_VERSION = "0.11.10";
+const CURRENT_VERSION = "0.11.11";
 
 const UPDATE_FILES = ["app.bundle.js"];
 

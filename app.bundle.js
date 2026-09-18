@@ -1,4 +1,4 @@
-// KRALI 100 YILLIK DENEYİM v0.11.9 — single-file runtime bundle
+// KRALI 100 YILLIK DENEYİM v0.11.10 — single-file runtime bundle
 (function () {
   const style = document.createElement("style");
   style.textContent = `* { box-sizing: border-box; }
@@ -1545,7 +1545,7 @@ input[type="checkbox"] {
 
   const v0119Style = document.createElement("style");
   v0119Style.textContent = `
-    /* v0.11.9 simple placement */
+    /* v0.11.10 simple placement */
     .alignGrid{display:none !important}
     .alignPad{
       display:flex !important;
@@ -1582,6 +1582,51 @@ input[type="checkbox"] {
   document.head.appendChild(v0119Style);
 
 
+  const v01110Style = document.createElement("style");
+  v01110Style.textContent = `
+    /* v0.11.10 compact 3x3 align pad */
+    .alignPad{
+      width:104px !important;
+      display:flex !important;
+      flex-wrap:wrap !important;
+      gap:4px !important;
+      margin:7px auto 8px !important;
+      padding:4px !important;
+      border:1px solid #262626 !important;
+      border-radius:8px !important;
+      background:#090909 !important;
+    }
+    .alignPad button{
+      flex:0 0 28px !important;
+      width:28px !important;
+      min-width:28px !important;
+      max-width:28px !important;
+      height:28px !important;
+      min-height:28px !important;
+      max-height:28px !important;
+      padding:0 !important;
+      margin:0 !important;
+      border-radius:5px !important;
+      font-size:11px !important;
+      line-height:28px !important;
+      text-align:center !important;
+      background:#111 !important;
+      border:1px solid #303030 !important;
+    }
+    .alignPad button:hover{
+      background:#211010 !important;
+      border-color:#ff4141 !important;
+    }
+    .alignPad .alignCenter{
+      background:#251010 !important;
+      border-color:#6a2323 !important;
+      color:#ff6f6f !important;
+    }
+  `;
+  document.head.appendChild(v01110Style);
+
+
+
 
 
 
@@ -1599,7 +1644,7 @@ input[type="checkbox"] {
       <div class="topActions">
         <button id="placeAssetTop" class="assetTopBtn" title="Dosyadan Asset Ekle">📁</button>
         <button id="updatePlugin" class="updateBtn">↻ Güncelle</button>
-        <div class="version">v0.11.9</div>
+        <div class="version">v0.11.10</div>
       </div>
     </header>
 
@@ -2890,7 +2935,7 @@ async function runAssistant() {
 }
 
 
-const CURRENT_VERSION = "0.11.9";
+const CURRENT_VERSION = "0.11.10";
 
 const UPDATE_FILES = ["app.bundle.js"];
 

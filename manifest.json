@@ -2,7 +2,7 @@
   "manifestVersion": 5,
   "id": "com.krali.design",
   "name": "KRALI 100 YILLIK DENEYİM",
-  "version": "0.11.3",
+  "version": "0.11.5",
   "main": "index.html",
   "host": {
     "app": "PS",
@@ -25,11 +25,11 @@
       },
       "minimumSize": {
         "width": 300,
-        "height": 520
+        "height": 650
       },
       "preferredDockedSize": {
         "width": 340,
-        "height": 760
+        "height": 1000
       }
     }
   ]

@@ -2,7 +2,17 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
-### v0.7.1 — Single Bundle Updater
+### v0.8.0 — UI cleanup
+- Üst sürüm etiketi artık `CURRENT_VERSION` değerinden runtime'da senkronlanır.
+- Updater rozeti kaldırıldı; güncelleme alanı tek satıra indirildi.
+- `Sürümü Güncelle` butonu daha kompakt `Güncelle` haline getirildi.
+- `Klasörü Yeniden Seç` aksiyonu `Klasör` olarak sadeleştirildi.
+- Hızlı Format açıklama metni kaldırıldı; ikonlar küçültüldü.
+- Kart, buton, input ve bölüm boşlukları azaltıldı.
+- Siyah + #FF4141 tema korunarak daha sıkı ve profesyonel bir panel düzeni oluşturuldu.
+
+
+### v0.8.0 — Single Bundle Updater
 - UI, tema ve çalışma mantığı `app.bundle.js` içinde birleştirildi.
 - `index.html` artık yalnızca sabit bootstrap dosyasıdır.
 - Panel içi updater bundan sonra yalnızca `app.bundle.js` dosyasını günceller.

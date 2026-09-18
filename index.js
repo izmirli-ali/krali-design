@@ -1,5 +1,5 @@
 const photoshop = require("photoshop");
-const { storage, shell } = require("uxp");
+const { storage } = require("uxp");
 
 const app = photoshop.app;
 const core = photoshop.core;
@@ -882,20 +882,94 @@ async function runAssistant() {
   setStatus("✓ Lokal Assistant komutu tamamlandı");
 }
 
-async function updatePluginFromGitHub() {
-  const pluginFolder = await fs.getPluginFolder();
-  const pluginPath = fs.getNativePath(pluginFolder);
-  const updaterPath = pluginPath + "/scripts/update.command";
 
-  setStatus("Güncelleme başlatılıyor...");
-  const result = await shell.openPath(
-    updaterPath,
-    "KRALI DESIGN GitHub'dan güncellenecek."
-  );
+const UPDATE_FILES = [
+  "manifest.json",
+  "index.html",
+  "styles.css",
+  "index.js",
+  "README.md",
+  "VERSION"
+];
 
-  if (result && result.length) throw new Error(result);
-  setStatus("✓ Güncelleyici açıldı. Load & Watch açıksa panel yenilenecek.");
+async function getUpdaterSettingsFile() {
+  const folder = await fs.getDataFolder();
+  let file;
+  try {
+    file = await folder.getEntry("krali-updater.json");
+  } catch (_) {
+    file = await folder.createFile("krali-updater.json", { overwrite: false });
+    await file.write(JSON.stringify({ folderToken: "" }, null, 2));
+  }
+  return file;
 }
+
+async function readUpdaterSettings() {
+  const file = await getUpdaterSettingsFile();
+  try {
+    const raw = await file.read();
+    return raw ? JSON.parse(raw) : { folderToken: "" };
+  } catch (_) {
+    return { folderToken: "" };
+  }
+}
+
+async function writeUpdaterSettings(settings) {
+  const file = await getUpdaterSettingsFile();
+  await file.write(JSON.stringify(settings, null, 2));
+}
+
+async function getWritablePluginFolder() {
+  const settings = await readUpdaterSettings();
+
+  if (settings.folderToken) {
+    try {
+      return await fs.getEntryForPersistentToken(settings.folderToken);
+    } catch (_) {}
+  }
+
+  setStatus("İlk kurulum: KRALI-DESIGN klasörünü seç...");
+  const folder = await fs.getFolder();
+  if (!folder) throw new Error("Klasör seçilmedi.");
+
+  const token = await fs.createPersistentToken(folder);
+  await writeUpdaterSettings({ folderToken: token });
+  return folder;
+}
+
+async function fetchGithubFile(path) {
+  const url = "https://raw.githubusercontent.com/izmirli-ali/krali-design/main/" + path + "?t=" + Date.now();
+  const response = await fetch(url, { cache: "no-store" });
+  if (!response.ok) throw new Error(path + " indirilemedi: HTTP " + response.status);
+  return await response.text();
+}
+
+async function writeTextFile(folder, path, content) {
+  let file;
+  try {
+    file = await folder.getEntry(path);
+  } catch (_) {
+    file = await folder.createFile(path, { overwrite: true });
+  }
+  await file.write(content);
+}
+
+async function updatePluginFromGitHub() {
+  const folder = await getWritablePluginFolder();
+
+  setStatus("GitHub sürümü kontrol ediliyor...");
+  const remoteVersion = (await fetchGithubFile("VERSION")).trim();
+
+  for (let i = 0; i < UPDATE_FILES.length; i++) {
+    const path = UPDATE_FILES[i];
+    setStatus("Güncelleniyor: " + path + " (" + (i + 1) + "/" + UPDATE_FILES.length + ")");
+    const content = await fetchGithubFile(path);
+    await writeTextFile(folder, path, content);
+  }
+
+  setStatus("✓ KRALI DESIGN " + remoteVersion + " indirildi. Load & Watch birkaç saniye içinde paneli yenilemeli.");
+}
+
 
 async function guarded(fn) {
   try {

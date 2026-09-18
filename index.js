@@ -11,11 +11,14 @@ const statusEl = document.getElementById("status");
 const brandSelect = document.getElementById("brandSelect");
 const assetList = document.getElementById("assetList");
 const assetCount = document.getElementById("assetCount");
+const layoutList = document.getElementById("layoutList");
+const layoutCount = document.getElementById("layoutCount");
+const docInfo = document.getElementById("docInfo");
 
 let lastSafePreset = null;
 let guidesVisible = true;
 let memoryFile = null;
-let memory = { version: 1, selectedBrandId: "", brands: [] };
+let memory = { version: 2, selectedBrandId: "", brands: [] };
 
 const ASSET_TYPES = {
   logo: "Logo",
@@ -59,9 +62,7 @@ function getDoc() {
 
 function getSelectedLayers() {
   const doc = getDoc();
-  if (!doc.activeLayers || !doc.activeLayers.length) {
-    throw new Error("En az bir layer seç.");
-  }
+  if (!doc.activeLayers || !doc.activeLayers.length) throw new Error("En az bir layer seç.");
   return doc.activeLayers;
 }
 
@@ -79,8 +80,27 @@ function layerBounds(layer) {
   };
 }
 
+function flattenTopLayers(doc) {
+  return Array.from(doc.layers || []);
+}
+
 async function modal(name, fn) {
   return await core.executeAsModal(fn, { commandName: "KRALI - " + name });
+}
+
+async function refreshDocInfo() {
+  if (!app.documents.length) {
+    docInfo.textContent = "Açık belge yok.";
+    return;
+  }
+
+  const doc = app.activeDocument;
+  const selected = doc.activeLayers ? doc.activeLayers.length : 0;
+  docInfo.textContent =
+    doc.title + "  •  " +
+    Math.round(px(doc.width)) + "×" + Math.round(px(doc.height)) + " px" +
+    "  •  " + selected + " layer seçili" +
+    "  •  " + (doc.layers ? doc.layers.length : 0) + " üst seviye layer";
 }
 
 async function initMemory() {
@@ -98,15 +118,20 @@ async function initMemory() {
       const raw = await memoryFile.read();
       if (raw && raw.trim()) {
         const parsed = JSON.parse(raw);
-        if (parsed && Array.isArray(parsed.brands)) {
-          memory = parsed;
-        }
+        if (parsed && Array.isArray(parsed.brands)) memory = parsed;
       }
     } catch (err) {
       console.warn("Memory read failed:", err);
     }
 
+    memory.version = 2;
+    memory.brands.forEach(b => {
+      if (!Array.isArray(b.assets)) b.assets = [];
+      if (!Array.isArray(b.layouts)) b.layouts = [];
+    });
+
     renderBrands();
+    await refreshDocInfo();
     setStatus("✓ KRALI hafızası hazır");
   } catch (err) {
     console.error(err);
@@ -115,9 +140,7 @@ async function initMemory() {
 }
 
 async function saveMemory() {
-  if (!memoryFile) {
-    await initMemory();
-  }
+  if (!memoryFile) await initMemory();
   await memoryFile.write(JSON.stringify(memory, null, 2));
 }
 
@@ -127,9 +150,7 @@ function getSelectedBrand() {
 }
 
 function renderBrands() {
-  while (brandSelect.options.length > 1) {
-    brandSelect.remove(1);
-  }
+  while (brandSelect.options.length > 1) brandSelect.remove(1);
 
   memory.brands.forEach(brand => {
     const option = document.createElement("option");
@@ -148,69 +169,102 @@ function renderBrands() {
   }
 
   renderAssets();
+  renderLayouts();
+}
+
+function clearNode(node) {
+  while (node.firstChild) node.removeChild(node.firstChild);
+}
+
+function makeMemoryRow(nameText, subText, primaryText, primaryFn, deleteFn) {
+  const row = document.createElement("div");
+  row.className = "memoryItem";
+
+  const meta = document.createElement("div");
+  meta.className = "memoryMeta";
+
+  const name = document.createElement("div");
+  name.className = "memoryName";
+  name.textContent = nameText;
+
+  const sub = document.createElement("div");
+  sub.className = "memorySub";
+  sub.textContent = subText || "";
+
+  meta.appendChild(name);
+  meta.appendChild(sub);
+
+  const actions = document.createElement("div");
+  actions.className = "memoryActions";
+
+  const primary = document.createElement("button");
+  primary.textContent = primaryText;
+  primary.addEventListener("click", () => guarded(primaryFn));
+
+  const del = document.createElement("button");
+  del.textContent = "×";
+  del.className = "danger";
+  del.addEventListener("click", () => guarded(deleteFn));
+
+  actions.appendChild(primary);
+  actions.appendChild(del);
+
+  row.appendChild(meta);
+  row.appendChild(actions);
+  return row;
 }
 
 function renderAssets() {
-  while (assetList.firstChild) {
-    assetList.removeChild(assetList.firstChild);
-  }
-
+  clearNode(assetList);
   const brand = getSelectedBrand();
   const assets = brand ? brand.assets || [] : [];
   assetCount.textContent = String(assets.length);
 
-  if (!brand) {
+  if (!brand || !assets.length) {
     const empty = document.createElement("div");
     empty.className = "empty";
-    empty.textContent = "Önce bir marka oluştur.";
-    assetList.appendChild(empty);
-    return;
-  }
-
-  if (!assets.length) {
-    const empty = document.createElement("div");
-    empty.className = "empty";
-    empty.textContent = brand.name + " için henüz kayıtlı asset yok.";
+    empty.textContent = brand ? brand.name + " için kayıtlı asset yok." : "Önce bir marka oluştur.";
     assetList.appendChild(empty);
     return;
   }
 
   assets.forEach(asset => {
-    const row = document.createElement("div");
-    row.className = "assetItem";
+    assetList.appendChild(
+      makeMemoryRow(
+        asset.name,
+        ASSET_TYPES[asset.type] || asset.type,
+        "Ekle",
+        () => placeMemoryAsset(asset),
+        () => deleteMemoryAsset(asset.id)
+      )
+    );
+  });
+}
 
-    const meta = document.createElement("div");
-    meta.className = "assetMeta";
+function renderLayouts() {
+  clearNode(layoutList);
+  const brand = getSelectedBrand();
+  const layouts = brand ? brand.layouts || [] : [];
+  layoutCount.textContent = String(layouts.length);
 
-    const name = document.createElement("div");
-    name.className = "assetName";
-    name.textContent = asset.name;
+  if (!brand || !layouts.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = brand ? brand.name + " için kayıtlı tasarım yok." : "Önce marka seç.";
+    layoutList.appendChild(empty);
+    return;
+  }
 
-    const type = document.createElement("div");
-    type.className = "assetType";
-    type.textContent = ASSET_TYPES[asset.type] || asset.type;
-
-    meta.appendChild(name);
-    meta.appendChild(type);
-
-    const actions = document.createElement("div");
-    actions.className = "assetActions";
-
-    const addBtn = document.createElement("button");
-    addBtn.textContent = "Ekle";
-    addBtn.addEventListener("click", () => guarded(() => placeMemoryAsset(asset)));
-
-    const delBtn = document.createElement("button");
-    delBtn.textContent = "×";
-    delBtn.className = "danger";
-    delBtn.addEventListener("click", () => guarded(() => deleteMemoryAsset(asset.id)));
-
-    actions.appendChild(addBtn);
-    actions.appendChild(delBtn);
-
-    row.appendChild(meta);
-    row.appendChild(actions);
-    assetList.appendChild(row);
+  layouts.forEach(layout => {
+    layoutList.appendChild(
+      makeMemoryRow(
+        layout.name,
+        layout.width + "×" + layout.height + " • " + layout.layers.length + " layer",
+        "Uygula",
+        () => applyLayout(layout),
+        () => deleteLayout(layout.id)
+      )
+    );
   });
 }
 
@@ -224,6 +278,7 @@ async function addBrand() {
     memory.selectedBrandId = existing.id;
     brandSelect.value = existing.id;
     renderAssets();
+    renderLayouts();
     throw new Error("Bu marka zaten kayıtlı.");
   }
 
@@ -264,7 +319,6 @@ async function registerAsset() {
     createdAt: new Date().toISOString()
   };
 
-  brand.assets = brand.assets || [];
   brand.assets.push(asset);
   nameInput.value = "";
 
@@ -276,10 +330,107 @@ async function registerAsset() {
 async function deleteMemoryAsset(assetId) {
   const brand = getSelectedBrand();
   if (!brand) return;
-  brand.assets = (brand.assets || []).filter(a => a.id !== assetId);
+  brand.assets = brand.assets.filter(a => a.id !== assetId);
   await saveMemory();
   renderAssets();
   setStatus("✓ Asset hafızadan kaldırıldı");
+}
+
+async function learnLayout() {
+  const brand = getSelectedBrand();
+  if (!brand) throw new Error("Önce marka seç.");
+
+  const doc = getDoc();
+  const nameInput = document.getElementById("layoutName");
+  const name = nameInput.value.trim() || doc.title;
+
+  const w = px(doc.width);
+  const h = px(doc.height);
+  const layers = [];
+
+  flattenTopLayers(doc).forEach(layer => {
+    try {
+      const b = layerBounds(layer);
+      const lw = b.right - b.left;
+      const lh = b.bottom - b.top;
+      if (lw <= 0 || lh <= 0) return;
+
+      layers.push({
+        name: layer.name,
+        x: b.left / w,
+        y: b.top / h,
+        width: lw / w,
+        height: lh / h,
+        opacity: typeof layer.opacity === "number" ? layer.opacity : 100,
+        visible: layer.visible !== false
+      });
+    } catch (_) {}
+  });
+
+  if (!layers.length) throw new Error("Kaydedilebilir layer bulunamadı.");
+
+  const layout = {
+    id: uid("layout"),
+    name,
+    width: Math.round(w),
+    height: Math.round(h),
+    layers,
+    createdAt: new Date().toISOString()
+  };
+
+  brand.layouts.push(layout);
+  nameInput.value = "";
+  await saveMemory();
+  renderLayouts();
+  setStatus("✓ Tasarım öğrenildi: " + name + " (" + layers.length + " layer)");
+}
+
+async function deleteLayout(layoutId) {
+  const brand = getSelectedBrand();
+  if (!brand) return;
+  brand.layouts = brand.layouts.filter(l => l.id !== layoutId);
+  await saveMemory();
+  renderLayouts();
+  setStatus("✓ Tasarım hafızadan kaldırıldı");
+}
+
+async function applyLayout(layout) {
+  const doc = getDoc();
+  const docW = px(doc.width);
+  const docH = px(doc.height);
+  const currentLayers = flattenTopLayers(doc);
+
+  await modal("Tasarım Hafızası " + layout.name, async () => {
+    for (const saved of layout.layers) {
+      const layer = currentLayers.find(l => normalizeText(l.name) === normalizeText(saved.name));
+      if (!layer) continue;
+
+      const b = layerBounds(layer);
+      const curW = b.right - b.left;
+      const curH = b.bottom - b.top;
+      const targetW = saved.width * docW;
+      const targetH = saved.height * docH;
+
+      if (curW > 0 && curH > 0) {
+        const scaleX = targetW / curW;
+        const scaleY = targetH / curH;
+        const scale = Math.min(scaleX, scaleY);
+        await layer.scale(scale * 100, scale * 100, constants.AnchorPosition.TOPLEFT);
+      }
+
+      const nb = layerBounds(layer);
+      await layer.translate(
+        saved.x * docW - nb.left,
+        saved.y * docH - nb.top
+      );
+
+      try { layer.opacity = saved.opacity; } catch (_) {}
+      try { layer.visible = saved.visible; } catch (_) {}
+    }
+  });
+
+  setStatus("✓ Tasarım uygulandı: " + layout.name + ". Eşleşme layer adlarına göre yapıldı.");
+  await refreshDocInfo();
 }
 
 async function placeEntry(entry, commandName) {
@@ -290,10 +441,7 @@ async function placeEntry(entry, commandName) {
       [{
         _obj: "placeEvent",
         null: { _path: sessionToken, _kind: "local" },
-        freeTransformCenterState: {
-          _enum: "quadCenterState",
-          _value: "QCSAverage"
-        },
+        freeTransformCenterState: { _enum: "quadCenterState", _value: "QCSAverage" },
         offset: {
           _obj: "offset",
           horizontal: { _unit: "pixelsUnit", _value: 0 },
@@ -304,6 +452,8 @@ async function placeEntry(entry, commandName) {
       {}
     );
   });
+
+  await refreshDocInfo();
 }
 
 async function placeMemoryAsset(asset) {
@@ -313,7 +463,7 @@ async function placeMemoryAsset(asset) {
   try {
     entry = await fs.getEntryForPersistentToken(asset.token);
   } catch (_) {
-    throw new Error(asset.name + " dosyası bulunamadı. Dosya taşınmış veya izin geçersiz olabilir.");
+    throw new Error(asset.name + " dosyası bulunamadı. Dosya taşınmış olabilir.");
   }
 
   await placeEntry(entry, "Asset " + asset.name);
@@ -322,9 +472,7 @@ async function placeMemoryAsset(asset) {
 
 async function clearGuidesInternal() {
   const doc = getDoc();
-  if (doc.guides && doc.guides.length) {
-    doc.guides.removeAll();
-  }
+  if (doc.guides && doc.guides.length) doc.guides.removeAll();
 }
 
 const SAFE_PRESETS = {
@@ -343,7 +491,6 @@ async function applySafePreset(key) {
   await modal("Safe Zone " + preset.name, async () => {
     const doc = getDoc();
     await clearGuidesInternal();
-
     const w = px(doc.width);
     const h = px(doc.height);
 
@@ -359,43 +506,41 @@ async function applySafePreset(key) {
 }
 
 async function clearGuides() {
-  await modal("Guide Temizle", async () => {
-    await clearGuidesInternal();
-  });
+  await modal("Guide Temizle", clearGuidesInternal);
   guidesVisible = false;
   setStatus("✓ Guide'lar temizlendi");
 }
 
 async function toggleGuides() {
   if (guidesVisible) {
-    await modal("Guide Gizle", async () => {
-      await clearGuidesInternal();
-    });
+    await modal("Guide Gizle", clearGuidesInternal);
     guidesVisible = false;
     setStatus("✓ Safe Zone gizlendi");
   } else {
-    if (!lastSafePreset) throw new Error("Önce bir Safe Zone preset seç.");
+    if (!lastSafePreset) throw new Error("Önce bir Safe Zone seç.");
     await applySafePreset(lastSafePreset);
   }
 }
 
-async function centerSelectedLayer() {
-  await modal("Ortala", async () => {
+async function alignSelected(axis) {
+  await modal("Hizala", async () => {
     const doc = getDoc();
     const layer = getLayer();
     const b = layerBounds(layer);
-
-    const layerW = b.right - b.left;
-    const layerH = b.bottom - b.top;
     const docW = px(doc.width);
     const docH = px(doc.height);
+    const lw = b.right - b.left;
+    const lh = b.bottom - b.top;
 
-    await layer.translate(
-      ((docW - layerW) / 2) - b.left,
-      ((docH - layerH) / 2) - b.top
-    );
+    let dx = 0;
+    let dy = 0;
+    if (axis === "h" || axis === "both") dx = ((docW - lw) / 2) - b.left;
+    if (axis === "v" || axis === "both") dy = ((docH - lh) / 2) - b.top;
+
+    await layer.translate(dx, dy);
   });
-  setStatus("✓ Layer ortalandı");
+
+  setStatus(axis === "h" ? "✓ Yatay ortalandı" : axis === "v" ? "✓ Dikey ortalandı" : "✓ Tam ortalandı");
 }
 
 async function scaleAndCenter(mode) {
@@ -421,11 +566,9 @@ async function scaleAndCenter(mode) {
     const nw = b.right - b.left;
     const nh = b.bottom - b.top;
 
-    await layer.translate(
-      ((docW - nw) / 2) - b.left,
-      ((docH - nh) / 2) - b.top
-    );
+    await layer.translate(((docW - nw) / 2) - b.left, ((docH - nh) / 2) - b.top);
   });
+
   setStatus(mode === "fit" ? "✓ Layer canvas'a sığdırıldı" : "✓ Layer canvas'ı doldurdu");
 }
 
@@ -438,34 +581,24 @@ async function setWidthPercent(percent) {
     const currentW = b.right - b.left;
     const docW = px(doc.width);
     const docH = px(doc.height);
-
     if (currentW <= 0) throw new Error("Layer genişliği geçersiz.");
 
-    const targetW = docW * (percent / 100);
-    const scalePct = (targetW / currentW) * 100;
-
+    const scalePct = ((docW * (percent / 100)) / currentW) * 100;
     await layer.scale(scalePct, scalePct, constants.AnchorPosition.MIDDLECENTER);
 
     b = layerBounds(layer);
     const nw = b.right - b.left;
     const nh = b.bottom - b.top;
-
-    await layer.translate(
-      ((docW - nw) / 2) - b.left,
-      ((docH - nh) / 2) - b.top
-    );
+    await layer.translate(((docW - nw) / 2) - b.left, ((docH - nh) / 2) - b.top);
   });
 
-  setStatus("✓ Layer genişliği canvas'ın %" + percent + " değerine ayarlandı");
+  setStatus("✓ Layer canvas genişliğinin %" + percent + " değerine ayarlandı");
 }
 
 async function convertToSmartObject() {
   getLayer();
   await modal("Smart Object", async () => {
-    await batchPlay(
-      [{ _obj: "newPlacedLayer", _options: { dialogOptions: "dontDisplay" } }],
-      {}
-    );
+    await batchPlay([{ _obj: "newPlacedLayer", _options: { dialogOptions: "dontDisplay" } }], {});
   });
   setStatus("✓ Smart Object'a dönüştürüldü");
 }
@@ -473,13 +606,10 @@ async function convertToSmartObject() {
 async function groupSelectedLayers() {
   await modal("Grupla", async () => {
     const doc = getDoc();
-    const layers = getSelectedLayers();
-    await doc.createLayerGroup({
-      name: "KRALI GROUP",
-      fromLayers: layers
-    });
+    await doc.createLayerGroup({ name: "KRALI GROUP", fromLayers: getSelectedLayers() });
   });
   setStatus("✓ Seçili layer'lar gruplandı");
+  await refreshDocInfo();
 }
 
 async function renameSelectedLayer() {
@@ -496,19 +626,22 @@ async function renameSelectedLayer() {
   setStatus("✓ Layer adı: " + clean);
 }
 
+async function duplicateSelectedLayer() {
+  const layer = getLayer();
+  await modal("Layer Kopyala", async () => {
+    await layer.duplicate();
+  });
+  setStatus("✓ Layer kopyalandı");
+  await refreshDocInfo();
+}
+
 async function placeAsset() {
   getDoc();
-
   const file = await fs.getFileForOpening({
     allowMultiple: false,
     types: ["png", "jpg", "jpeg", "webp", "tif", "tiff", "psd", "psb", "svg"]
   });
-
-  if (!file) {
-    setStatus("Asset seçimi iptal edildi");
-    return;
-  }
-
+  if (!file) return setStatus("Asset seçimi iptal edildi");
   await placeEntry(file, "Dosyadan Asset");
   setStatus("✓ Asset Smart Object olarak eklendi");
 }
@@ -555,6 +688,7 @@ async function runAssistant() {
     brandSelect.value = commandBrand.id;
     await saveMemory();
     renderAssets();
+    renderLayouts();
 
     const commandAsset = findAssetFromCommand(commandBrand, raw);
     if (commandAsset) {
@@ -563,74 +697,36 @@ async function runAssistant() {
     }
   }
 
-  if (input.includes("reels")) {
-    await applySafePreset("reels");
-    didSomething = true;
-  } else if (input.includes("story") || input.includes("hikaye")) {
-    await applySafePreset("story");
-    didSomething = true;
-  } else if (input.includes("4:5") || input.includes("4x5")) {
-    await applySafePreset("post45");
-    didSomething = true;
-  } else if (input.includes("16:9") || input.includes("16x9") || input.includes("yatay")) {
-    await applySafePreset("wide169");
-    didSomething = true;
-  } else if (input.includes("kare") || input.includes("1:1")) {
-    await applySafePreset("square");
-    didSomething = true;
-  }
+  if (input.includes("reels")) { await applySafePreset("reels"); didSomething = true; }
+  else if (input.includes("story") || input.includes("hikaye")) { await applySafePreset("story"); didSomething = true; }
+  else if (input.includes("4:5") || input.includes("4x5")) { await applySafePreset("post45"); didSomething = true; }
+  else if (input.includes("16:9") || input.includes("16x9") || input.includes("yatay")) { await applySafePreset("wide169"); didSomething = true; }
+  else if (input.includes("kare") || input.includes("1:1")) { await applySafePreset("square"); didSomething = true; }
 
-  if (input.includes("smart")) {
-    await convertToSmartObject();
-    didSomething = true;
-  }
+  if (input.includes("smart")) { await convertToSmartObject(); didSomething = true; }
+  if (input.includes("grupla") || input.includes("grup")) { await groupSelectedLayers(); didSomething = true; }
 
-  if (input.includes("grupla") || input.includes("grup")) {
-    await groupSelectedLayers();
-    didSomething = true;
-  }
+  if (input.includes("fill") || input.includes("doldur")) { await scaleAndCenter("fill"); didSomething = true; }
+  else if (input.includes("fit") || input.includes("sigdir")) { await scaleAndCenter("fit"); didSomething = true; }
+  else if (input.includes("ortala") || input.includes("merkez")) { await alignSelected("both"); didSomething = true; }
 
-  if (input.includes("fill") || input.includes("doldur")) {
-    await scaleAndCenter("fill");
-    didSomething = true;
-  } else if (input.includes("fit") || input.includes("sigdir")) {
-    await scaleAndCenter("fit");
-    didSomething = true;
-  } else if (input.includes("ortala") || input.includes("merkez")) {
-    await centerSelectedLayer();
-    didSomething = true;
-  }
-
-  if (!didSomething) {
-    throw new Error("Komut anlaşılmadı veya eşleşen kayıtlı asset bulunamadı.");
-  }
-
+  if (!didSomething) throw new Error("Komut anlaşılmadı veya eşleşen kayıtlı asset bulunamadı.");
   setStatus("✓ Lokal Assistant komutu tamamlandı");
 }
 
-
 async function updatePluginFromGitHub() {
-  try {
-    const pluginFolder = await fs.getPluginFolder();
-    const pluginPath = fs.getNativePath(pluginFolder);
-    const updaterPath = pluginPath + "/scripts/update.command";
+  const pluginFolder = await fs.getPluginFolder();
+  const pluginPath = fs.getNativePath(pluginFolder);
+  const updaterPath = pluginPath + "/scripts/update.command";
 
-    setStatus("Güncelleme başlatılıyor...");
+  setStatus("Güncelleme başlatılıyor...");
+  const result = await shell.openPath(
+    updaterPath,
+    "KRALI DESIGN GitHub'dan güncellenecek."
+  );
 
-    const result = await shell.openPath(
-      updaterPath,
-      "KRALI DESIGN güncelleme dosyası çalıştırılacak. Bu işlem GitHub reposundan en son sürümü indirir."
-    );
-
-    if (result && result.length) {
-      throw new Error(result);
-    }
-
-    setStatus("✓ Güncelleyici açıldı. GitHub güncellemesi tamamlanınca panel otomatik yenilenir.");
-  } catch (err) {
-    console.error(err);
-    throw new Error("Güncelleyici açılamadı: " + (err && err.message ? err.message : String(err)));
-  }
+  if (result && result.length) throw new Error(result);
+  setStatus("✓ Güncelleyici açıldı. Load & Watch açıksa panel yenilenecek.");
 }
 
 async function guarded(fn) {
@@ -643,6 +739,7 @@ async function guarded(fn) {
 }
 
 document.getElementById("updatePlugin").addEventListener("click", () => guarded(updatePluginFromGitHub));
+document.getElementById("refreshDoc").addEventListener("click", () => guarded(refreshDocInfo));
 
 document.querySelectorAll("[data-safe]").forEach(btn => {
   btn.addEventListener("click", () => guarded(() => applySafePreset(btn.dataset.safe)));
@@ -650,7 +747,10 @@ document.querySelectorAll("[data-safe]").forEach(btn => {
 
 document.getElementById("toggleGuides").addEventListener("click", () => guarded(toggleGuides));
 document.getElementById("clearGuides").addEventListener("click", () => guarded(clearGuides));
-document.getElementById("centerLayer").addEventListener("click", () => guarded(centerSelectedLayer));
+
+document.getElementById("centerH").addEventListener("click", () => guarded(() => alignSelected("h")));
+document.getElementById("centerV").addEventListener("click", () => guarded(() => alignSelected("v")));
+document.getElementById("centerLayer").addEventListener("click", () => guarded(() => alignSelected("both")));
 document.getElementById("fitLayer").addEventListener("click", () => guarded(() => scaleAndCenter("fit")));
 document.getElementById("fillLayer").addEventListener("click", () => guarded(() => scaleAndCenter("fill")));
 
@@ -661,15 +761,19 @@ document.querySelectorAll("[data-widthpct]").forEach(btn => {
 document.getElementById("smartObject").addEventListener("click", () => guarded(convertToSmartObject));
 document.getElementById("groupLayers").addEventListener("click", () => guarded(groupSelectedLayers));
 document.getElementById("renameLayer").addEventListener("click", () => guarded(renameSelectedLayer));
+document.getElementById("duplicateLayer").addEventListener("click", () => guarded(duplicateSelectedLayer));
 document.getElementById("placeAsset").addEventListener("click", () => guarded(placeAsset));
+
 document.getElementById("assistantRun").addEventListener("click", () => guarded(runAssistant));
 document.getElementById("addBrand").addEventListener("click", () => guarded(addBrand));
 document.getElementById("registerAsset").addEventListener("click", () => guarded(registerAsset));
+document.getElementById("learnLayout").addEventListener("click", () => guarded(learnLayout));
 
 brandSelect.addEventListener("change", () => guarded(async () => {
   memory.selectedBrandId = brandSelect.value;
   await saveMemory();
   renderAssets();
+  renderLayouts();
   const brand = getSelectedBrand();
   setStatus(brand ? "✓ Aktif marka: " + brand.name : "Marka seçilmedi");
 }));

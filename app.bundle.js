@@ -1,4 +1,4 @@
-// KRALI DESIGN v0.10.0 — single-file runtime bundle
+// KRALI DESIGN v0.10.1 — single-file runtime bundle
 (function () {
   const style = document.createElement("style");
   style.textContent = `* { box-sizing: border-box; }
@@ -1073,6 +1073,174 @@ input[type="checkbox"] {
   document.head.appendChild(v0100Style);
 
 
+  const v0101Style = document.createElement("style");
+  v0101Style.textContent = `
+    /* v0.10.1 UI polish */
+    .topbar{
+      display:flex !important;
+      flex-direction:row !important;
+      align-items:flex-start !important;
+      justify-content:space-between !important;
+      gap:8px !important;
+      padding:3px 2px 8px !important;
+    }
+    .brandBlock{
+      flex:1 1 auto !important;
+      min-width:0 !important;
+    }
+    .topActions{
+      width:auto !important;
+      margin-left:auto !important;
+      flex:0 0 auto !important;
+      justify-content:flex-end !important;
+      align-items:center !important;
+      gap:7px !important;
+    }
+    .updateBtn{
+      min-height:22px !important;
+      padding:0 8px !important;
+      border-radius:6px !important;
+      font-size:7.5px !important;
+      font-weight:700 !important;
+      background:#121212 !important;
+      color:#ff6f6f !important;
+      border:1px solid #4e2020 !important;
+    }
+    .updateBtn:hover{
+      background:#261010 !important;
+      border-color:#ff4141 !important;
+      color:#ffffff !important;
+    }
+    .version{
+      font-size:7.5px !important;
+      color:#ff6c6c !important;
+      white-space:nowrap !important;
+    }
+    .refreshIconBtn{
+      width:25px !important;
+      min-width:25px !important;
+      min-height:23px !important;
+      padding:0 !important;
+      border-radius:6px !important;
+      font-size:11px !important;
+      background:#111 !important;
+      color:#bdbdbd !important;
+    }
+    section{
+      padding:8px !important;
+      margin-bottom:6px !important;
+      background:#0f0f0f !important;
+      border-color:#252525 !important;
+    }
+    h2{
+      margin-bottom:6px !important;
+      font-size:8.5px !important;
+    }
+    .docInfo{
+      padding:7px 8px !important;
+      margin-top:5px !important;
+    }
+    .formatMode{
+      margin-bottom:4px !important;
+    }
+    .modeToggle{
+      padding:2px !important;
+      gap:3px !important;
+      border-radius:7px !important;
+    }
+    .modeBtn{
+      min-height:23px !important;
+      font-size:7.5px !important;
+      border-radius:5px !important;
+    }
+    .modeBtn.active{
+      background:#241010 !important;
+      border-color:#702525 !important;
+      color:#fff !important;
+    }
+    .checkLine{
+      min-height:19px !important;
+      font-size:8px !important;
+    }
+    .formatIcons{
+      gap:3px !important;
+      margin:4px 0 0 !important;
+    }
+    .formatIconBtn{
+      min-height:38px !important;
+      padding:4px 2px !important;
+      border-radius:6px !important;
+      background:#101010 !important;
+      border-color:#252525 !important;
+    }
+    .ratio916{width:9px !important;height:18px !important}
+    .ratio45{width:13px !important;height:17px !important}
+    .ratio11{width:16px !important;height:16px !important}
+    .ratio169{width:22px !important;height:12px !important}
+    .ratioLabel{font-size:7px !important}
+    .safeGrid{
+      display:grid !important;
+      grid-template-columns:repeat(3,1fr) !important;
+      gap:4px !important;
+      margin-bottom:4px !important;
+    }
+    .safePresetBtn{
+      min-width:0 !important;
+      min-height:36px !important;
+      padding:4px 2px !important;
+      display:flex !important;
+      flex-direction:column !important;
+      align-items:center !important;
+      justify-content:center !important;
+      gap:2px !important;
+      background:#111 !important;
+      border-color:#292929 !important;
+    }
+    .safeName{
+      display:block !important;
+      font-size:8px !important;
+      line-height:1 !important;
+      color:#ededed !important;
+    }
+    .safeRatio{
+      display:block !important;
+      margin:0 !important;
+      font-size:7px !important;
+      line-height:1 !important;
+      color:#ff6d6d !important;
+    }
+    .buttonRow button{
+      background:#111 !important;
+      border-color:#292929 !important;
+      min-height:27px !important;
+      font-size:8px !important;
+    }
+    .alignGrid{
+      margin:5px 0 !important;
+      padding:3px !important;
+      gap:3px !important;
+    }
+    .alignGrid button{
+      min-height:25px !important;
+      background:#0d0d0d !important;
+    }
+    .layerQuickRow button{
+      background:#0d0d0d !important;
+    }
+    @media (max-width:330px){
+      .topbar{
+        flex-direction:row !important;
+      }
+      .topActions{
+        width:auto !important;
+        justify-content:flex-end !important;
+      }
+    }
+  `;
+  document.head.appendChild(v0101Style);
+
+
+
   document.body.innerHTML = `<div class="app">
     <header class="topbar">
       <div class="brandBlock">
@@ -1080,15 +1248,15 @@ input[type="checkbox"] {
         <div class="sub">Photoshop Workflow Accelerator</div>
       </div>
       <div class="topActions">
-        <button id="updatePlugin" class="updateBtn">Güncelle</button>
-        <div class="version">v0.10.0</div>
+        <button id="updatePlugin" class="updateBtn">↻ Güncelle</button>
+        <div class="version">v0.10.1</div>
       </div>
     </header>
 
     <section class="docCard">
       <div class="sectionHead">
         <h2>AKTİF BELGE</h2>
-        <button id="refreshDoc" class="miniBtn">Yenile</button>
+        <button id="refreshDoc" class="miniBtn refreshIconBtn" title="Belge bilgisini yenile">↻</button>
       </div>
       <div id="docInfo" class="docInfo">Belge bilgisi bekleniyor...</div>
     </section>
@@ -1143,12 +1311,12 @@ input[type="checkbox"] {
     <section>
       <h2>SAFE ZONE</h2>
       <div class="safeGrid">
-        <button class="primary" data-safe="reels">Reels<span>9:16</span></button>
-        <button class="primary" data-safe="story">Story<span>9:16</span></button>
-        <button class="primary" data-safe="post45">Post<span>4:5</span></button>
-        <button class="primary" data-safe="wide169">Yatay<span>16:9</span></button>
-        <button class="primary" data-safe="square">Kare<span>1:1</span></button>
-        <button class="primary" data-safe="generic916">Genel<span>9:16</span></button>
+        <button class="primary safePresetBtn" data-safe="reels"><span class="safeName">Reels</span><span class="safeRatio">9:16</span></button>
+        <button class="primary safePresetBtn" data-safe="story"><span class="safeName">Story</span><span class="safeRatio">9:16</span></button>
+        <button class="primary safePresetBtn" data-safe="post45"><span class="safeName">Post</span><span class="safeRatio">4:5</span></button>
+        <button class="primary safePresetBtn" data-safe="wide169"><span class="safeName">Yatay</span><span class="safeRatio">16:9</span></button>
+        <button class="primary safePresetBtn" data-safe="square"><span class="safeName">Kare</span><span class="safeRatio">1:1</span></button>
+        <button class="primary safePresetBtn" data-safe="generic916"><span class="safeName">Genel</span><span class="safeRatio">9:16</span></button>
       </div>
       <div class="buttonRow two">
         <button id="toggleGuides" class="secondary">Göster / Gizle</button>
@@ -2263,7 +2431,7 @@ async function runAssistant() {
 }
 
 
-const CURRENT_VERSION = "0.10.0";
+const CURRENT_VERSION = "0.10.1";
 
 const UPDATE_FILES = ["app.bundle.js"];
 

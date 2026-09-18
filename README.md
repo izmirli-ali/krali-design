@@ -1,6 +1,12 @@
-# KRALI DESIGN
+# KRALI 100 YILLIK DENEYİM
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
+
+### v0.11.3 — Rename
+- Paket adı, panel başlığı ve Photoshop panel etiketi **KRALI 100 YILLIK DENEYİM** olarak değiştirildi.
+- Plugin ID korunarak mevcut eklentiyle aynı kurulum üzerinde devam edildi.
+- Manifest sürümü runtime sürümüyle 0.11.3 olarak eşitlendi.
+
 
 ### v0.11.2 — Canvas presets + Safe Zone toggle + distribute
 - Ölçek presetleri artık yalnızca mevcut çalışma yüzeyinin canvas ölçüsünü değiştirir; içerik boyutuna dokunmaz.

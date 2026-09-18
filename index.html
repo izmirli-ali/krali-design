@@ -7,19 +7,27 @@
 <body>
   <div class="app">
     <header class="topbar">
-      <div>
+      <div class="brandBlock">
         <div class="title">KRALI DESIGN</div>
         <div class="sub">Photoshop Workflow Accelerator</div>
       </div>
       <div class="topActions">
         <button id="updatePlugin" class="updateBtn">Sürümü Güncelle</button>
-        <div class="version">v0.3.1</div>
+        <div class="version">v0.4.0</div>
       </div>
     </header>
 
+    <section class="docCard">
+      <div class="sectionHead">
+        <h2>AKTİF BELGE</h2>
+        <button id="refreshDoc" class="miniBtn">Yenile</button>
+      </div>
+      <div id="docInfo" class="docInfo">Belge bilgisi bekleniyor...</div>
+    </section>
+
     <section>
       <h2>SAFE ZONE</h2>
-      <div class="grid2">
+      <div class="buttonRow two">
         <button class="primary" data-safe="reels">Reels 9:16</button>
         <button class="primary" data-safe="story">Story 9:16</button>
         <button class="primary" data-safe="post45">Post 4:5</button>
@@ -27,7 +35,7 @@
         <button class="primary" data-safe="square">Kare 1:1</button>
         <button class="primary" data-safe="generic916">Genel 9:16</button>
       </div>
-      <div class="grid2">
+      <div class="buttonRow two">
         <button id="toggleGuides" class="secondary">Göster / Gizle</button>
         <button id="clearGuides" class="danger">Temizle</button>
       </div>
@@ -35,12 +43,17 @@
 
     <section>
       <h2>YERLEŞİM</h2>
-      <div class="grid3">
-        <button id="centerLayer">Ortala</button>
+      <div class="buttonRow three">
+        <button id="centerH">Yatay Ortala</button>
+        <button id="centerV">Dikey Ortala</button>
+        <button id="centerLayer">Tam Ortala</button>
+      </div>
+      <div class="buttonRow three">
         <button id="fitLayer">Fit</button>
         <button id="fillLayer">Fill</button>
+        <button id="placeAsset">Dosyadan Asset</button>
       </div>
-      <div class="grid3">
+      <div class="buttonRow three">
         <button data-widthpct="80">%80 En</button>
         <button data-widthpct="90">%90 En</button>
         <button data-widthpct="100">%100 En</button>
@@ -49,24 +62,20 @@
 
     <section>
       <h2>LAYER</h2>
-      <div class="grid2">
+      <div class="buttonRow two">
         <button id="smartObject">Smart Object</button>
         <button id="groupLayers">Seçilileri Grupla</button>
-      </div>
-      <div class="grid2">
         <button id="renameLayer">Layer Adlandır</button>
-        <button id="placeAsset">Dosyadan Asset</button>
+        <button id="duplicateLayer">Kopyala</button>
       </div>
     </section>
 
     <section>
       <h2>MARKA HAFIZASI</h2>
 
-      <div class="row">
-        <select id="brandSelect" aria-label="Marka seç">
-          <option value="">Marka seç...</option>
-        </select>
-      </div>
+      <select id="brandSelect" aria-label="Marka seç">
+        <option value="">Marka seç...</option>
+      </select>
 
       <div class="inlineForm">
         <input id="newBrandName" type="text" placeholder="Yeni marka adı" />
@@ -88,25 +97,40 @@
 
       <button id="registerAsset" class="accent">Dosyayı Hafızaya Kaydet</button>
 
-      <div class="assetHeader">
+      <div class="listHead">
         <span>Kayıtlı Assetler</span>
         <span id="assetCount">0</span>
       </div>
-      <div id="assetList" class="assetList">
+      <div id="assetList" class="memoryList">
         <div class="empty">Önce bir marka oluştur.</div>
       </div>
     </section>
 
     <section>
-      <h2>LOCAL ASSISTANT</h2>
-      <textarea id="assistantPrompt" placeholder="Örn: Vox beyaz logosunu ekle ve reels safe zone aç"></textarea>
-      <button id="assistantRun" class="accent">Komutu Çalıştır</button>
-      <div class="tiny">
-        Lokal komutlar: ortala, fit, fill, reels, story, 4:5, 16:9, kare, smart object, grupla + kayıtlı marka/asset çağırma.
+      <h2>TASARIM HAFIZASI</h2>
+      <div class="tiny">Açık PSD'deki üst seviye layer konumlarını, ölçülerini ve görünürlük değerlerini aktif markaya kaydeder.</div>
+      <div class="inlineForm topGap">
+        <input id="layoutName" type="text" placeholder="Tasarım adı (örn. Cold Brew Post)" />
+        <button id="learnLayout" class="accent compact">Tasarımı Öğren</button>
+      </div>
+
+      <div class="listHead">
+        <span>Kayıtlı Tasarımlar</span>
+        <span id="layoutCount">0</span>
+      </div>
+      <div id="layoutList" class="memoryList">
+        <div class="empty">Henüz tasarım kaydı yok.</div>
       </div>
     </section>
 
-    <div id="status" class="status">Hafıza hazırlanıyor...</div>
+    <section>
+      <h2>LOCAL ASSISTANT</h2>
+      <textarea id="assistantPrompt" placeholder="Örn: Vox beyaz logosunu ekle, reels safe zone aç ve ortala"></textarea>
+      <button id="assistantRun" class="accent">Komutu Çalıştır</button>
+      <div class="tiny">Marka/asset çağırma + safe zone + fit/fill/ortalama komutlarını lokal olarak çalıştırır.</div>
+    </section>
+
+    <div id="status" class="status">KRALI DESIGN hazırlanıyor...</div>
   </div>
   <script src="index.js"></script>
 </body>

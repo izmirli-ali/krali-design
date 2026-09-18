@@ -1,4 +1,4 @@
-// KRALI DESIGN v0.8.1 — single-file runtime bundle
+// KRALI DESIGN v0.9.0 — single-file runtime bundle
 (function () {
   const style = document.createElement("style");
   style.textContent = `* { box-sizing: border-box; }
@@ -828,6 +828,164 @@ input[type="checkbox"] {
   `;
   document.head.appendChild(finalUiStyle);
 
+  const v090Style = document.createElement("style");
+  v090Style.textContent = `
+    /* v0.9.0 UI refinement */
+    .brandBlock::after{display:none !important}
+    .topbar{
+      border-bottom:1px solid #351717 !important;
+      padding:3px 2px 8px !important;
+      margin-bottom:8px !important;
+    }
+    .title{font-size:15px !important}
+    .sub{font-size:8px !important;color:#7f7f7f !important}
+    .updateBtn{
+      min-height:24px !important;
+      padding:0 9px !important;
+      background:#1a1a1a !important;
+      border:1px solid #5a2020 !important;
+      color:#ff7474 !important;
+      border-radius:7px !important;
+      font-size:8px !important;
+    }
+    .updateBtn:hover{
+      background:#2a1111 !important;
+      border-color:#ff4141 !important;
+    }
+    .version{
+      background:transparent !important;
+      border:none !important;
+      color:#ff6b6b !important;
+      padding:0 !important;
+      font-size:8px !important;
+    }
+    section{
+      background:#101010 !important;
+      border:1px solid #292929 !important;
+      border-radius:9px !important;
+    }
+    h2{color:#cfcfcf !important}
+    button{
+      background:#171717 !important;
+      border-color:#303030 !important;
+      color:#efefef !important;
+      box-shadow:none !important;
+    }
+    button:hover{
+      background:#211313 !important;
+      border-color:#ff4141 !important;
+    }
+    .miniBtn{
+      background:#171717 !important;
+      border-color:#323232 !important;
+    }
+    .docInfo{
+      background:#090909 !important;
+      border:1px solid #202020 !important;
+      padding:8px 9px !important;
+    }
+    .docName{
+      color:#f2f2f2;
+      font-size:10px;
+      font-weight:650;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .docMeta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:5px;
+      margin-top:4px;
+      color:#8e8e8e;
+      font-size:8px;
+    }
+    .docMeta span{color:#ff4141}
+    .resizeModeState{
+      display:none !important;
+    }
+    .modeToggle{
+      display:flex;
+      gap:4px;
+      padding:3px;
+      margin-bottom:4px;
+      border:1px solid #292929;
+      border-radius:8px;
+      background:#090909;
+    }
+    .modeBtn{
+      flex:1 1 50%;
+      min-height:26px !important;
+      border-radius:6px !important;
+      font-size:8px !important;
+      color:#8d8d8d !important;
+      background:transparent !important;
+      border-color:transparent !important;
+    }
+    .modeBtn.active{
+      color:#ffffff !important;
+      background:#2a1212 !important;
+      border-color:#6a2323 !important;
+    }
+    .checkLine{
+      font-size:8px !important;
+      color:#b6b6b6 !important;
+    }
+    .formatIcons{
+      gap:4px !important;
+      margin-top:4px !important;
+    }
+    .formatIconBtn{
+      min-height:42px !important;
+      border-radius:7px !important;
+      background:#121212 !important;
+    }
+    .ratioIcon{
+      border-color:#ff4141 !important;
+      border-width:1px !important;
+    }
+    .ratioLabel{font-size:7px !important}
+    .safeGrid{
+      display:flex;
+      flex-wrap:wrap;
+      gap:4px;
+      margin-bottom:4px;
+    }
+    .safeGrid button{
+      flex:1 1 30%;
+      min-width:28%;
+      min-height:34px !important;
+      padding:4px 3px !important;
+      font-size:8px !important;
+      line-height:1.05;
+    }
+    .safeGrid button span{
+      display:block;
+      margin-top:2px;
+      color:#ff7474;
+      font-size:7px;
+      font-weight:600;
+    }
+    .buttonRow.two button,
+    .buttonRow.three button{
+      background:#151515 !important;
+    }
+    .buttonRow .danger{
+      background:#251010 !important;
+      border-color:#4a1919 !important;
+      color:#ff9a9a !important;
+    }
+    input[type="text"],textarea,select{
+      background:#090909 !important;
+      border-color:#292929 !important;
+    }
+    .memoryItem,.empty,.status{
+      background:#0b0b0b !important;
+      border-color:#262626 !important;
+    }
+  `;
+  document.head.appendChild(v090Style);
+
   document.body.innerHTML = `<div class="app">
     <header class="topbar">
       <div class="brandBlock">
@@ -1094,17 +1252,23 @@ async function modal(name, fn) {
 
 async function refreshDocInfo() {
   if (!app.documents.length) {
-    docInfo.textContent = "Açık belge yok.";
+    docInfo.innerHTML = '<div class="docName">Açık belge yok</div><div class="docMeta">Photoshop belgesi bekleniyor</div>';
     return;
   }
 
   const doc = app.activeDocument;
   const selected = doc.activeLayers ? doc.activeLayers.length : 0;
-  docInfo.textContent =
-    doc.title + "  •  " +
-    Math.round(px(doc.width)) + "×" + Math.round(px(doc.height)) + " px" +
-    "  •  " + selected + " layer seçili" +
-    "  •  " + (doc.layers ? doc.layers.length : 0) + " üst seviye layer";
+  const width = Math.round(px(doc.width));
+  const height = Math.round(px(doc.height));
+  const layerCount = doc.layers ? doc.layers.length : 0;
+
+  docInfo.innerHTML =
+    '<div class="docName">' + String(doc.title || "Başlıksız") + '</div>' +
+    '<div class="docMeta">' +
+      width + '×' + height + ' px' +
+      '<span>•</span>' + selected + ' seçili' +
+      '<span>•</span>' + layerCount + ' layer' +
+    '</div>';
 }
 
 async function initMemory() {
@@ -1892,7 +2056,7 @@ async function runAssistant() {
 }
 
 
-const CURRENT_VERSION = "0.8.1";
+const CURRENT_VERSION = "0.9.0";
 
 const UPDATE_FILES = ["app.bundle.js"];
 
@@ -2080,6 +2244,18 @@ document.getElementById("refreshDoc").addEventListener("click", () => guarded(re
 
 document.querySelectorAll("[data-format]").forEach(btn => {
   btn.addEventListener("click", () => guarded(() => quickFormat(btn.dataset.format)));
+});
+
+document.querySelectorAll("[data-resize-mode]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const mode = btn.dataset.resizeMode;
+    const state = document.getElementById("resizeMode");
+    if (state) state.value = mode;
+    document.querySelectorAll("[data-resize-mode]").forEach(item => {
+      item.classList.toggle("active", item.dataset.resizeMode === mode);
+    });
+    setStatus(mode === "smart" ? "Akıllı Uyarla aktif" : "Sadece Canvas aktif");
+  });
 });
 
 document.querySelectorAll("[data-safe]").forEach(btn => {

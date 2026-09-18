@@ -1,5 +1,5 @@
 const photoshop = require("photoshop");
-const { storage } = require("uxp");
+const { storage, shell } = require("uxp");
 
 const app = photoshop.app;
 const core = photoshop.core;
@@ -608,6 +608,31 @@ async function runAssistant() {
   setStatus("✓ Lokal Assistant komutu tamamlandı");
 }
 
+
+async function updatePluginFromGitHub() {
+  try {
+    const pluginFolder = await fs.getPluginFolder();
+    const pluginPath = fs.getNativePath(pluginFolder);
+    const updaterPath = pluginPath + "/scripts/update.command";
+
+    setStatus("Güncelleme başlatılıyor...");
+
+    const result = await shell.openPath(
+      updaterPath,
+      "KRALI DESIGN güncelleme dosyası çalıştırılacak. Bu işlem GitHub reposundan en son sürümü indirir."
+    );
+
+    if (result && result.length) {
+      throw new Error(result);
+    }
+
+    setStatus("✓ Güncelleyici açıldı. GitHub güncellemesi tamamlanınca panel otomatik yenilenir.");
+  } catch (err) {
+    console.error(err);
+    throw new Error("Güncelleyici açılamadı: " + (err && err.message ? err.message : String(err)));
+  }
+}
+
 async function guarded(fn) {
   try {
     await fn();
@@ -616,6 +641,8 @@ async function guarded(fn) {
     setStatus("Hata: " + (err && err.message ? err.message : String(err)));
   }
 }
+
+document.getElementById("updatePlugin").addEventListener("click", () => guarded(updatePluginFromGitHub));
 
 document.querySelectorAll("[data-safe]").forEach(btn => {
   btn.addEventListener("click", () => guarded(() => applySafePreset(btn.dataset.safe)));

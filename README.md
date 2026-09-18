@@ -2,7 +2,14 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
-## v0.3.0
+## v0.3.1
+
+### Tek tık güncelleme
+- Panelin sağ üstünde **Sürümü Güncelle** butonu bulunur.
+- Buton, repo içindeki `scripts/update.command` dosyasını açar.
+- Bu dosya `git pull` çalıştırır.
+- UXP Developer Tool'da **Load & Watch** açıksa değişiklikler otomatik yüklenir.
+- UXP güvenliği nedeniyle ilk kullanımda macOS/Adobe izin penceresi gösterebilir.
 
 ### Quick tools
 - Reels / Story / 4:5 / 16:9 / 1:1 / Generic 9:16 Safe Zone

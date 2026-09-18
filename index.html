@@ -11,7 +11,7 @@
         <div class="title">KRALI DESIGN</div>
         <div class="sub">Photoshop Workflow Accelerator</div>
       </div>
-      <div class="version">v0.2.1</div>
+      <div class="version">v0.3.0</div>
     </header>
 
     <section>
@@ -28,7 +28,6 @@
         <button id="toggleGuides" class="secondary">Göster / Gizle</button>
         <button id="clearGuides" class="danger">Temizle</button>
       </div>
-      <div class="tiny">Preset seçildiğinde önce eski guide'lar temizlenir.</div>
     </section>
 
     <section>
@@ -53,18 +52,58 @@
       </div>
       <div class="grid2">
         <button id="renameLayer">Layer Adlandır</button>
-        <button id="placeAsset">Asset Ekle</button>
+        <button id="placeAsset">Dosyadan Asset</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>MARKA HAFIZASI</h2>
+
+      <div class="row">
+        <select id="brandSelect" aria-label="Marka seç">
+          <option value="">Marka seç...</option>
+        </select>
+      </div>
+
+      <div class="inlineForm">
+        <input id="newBrandName" type="text" placeholder="Yeni marka adı" />
+        <button id="addBrand" class="accent compact">Marka Ekle</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="inlineForm">
+        <input id="assetName" type="text" placeholder="Asset adı (örn. Beyaz Logo)" />
+        <select id="assetType" aria-label="Asset türü">
+          <option value="logo">Logo</option>
+          <option value="product">Ürün</option>
+          <option value="background">Background</option>
+          <option value="decor">Dekor</option>
+          <option value="other">Diğer</option>
+        </select>
+      </div>
+
+      <button id="registerAsset" class="accent">Dosyayı Hafızaya Kaydet</button>
+
+      <div class="assetHeader">
+        <span>Kayıtlı Assetler</span>
+        <span id="assetCount">0</span>
+      </div>
+      <div id="assetList" class="assetList">
+        <div class="empty">Önce bir marka oluştur.</div>
       </div>
     </section>
 
     <section>
       <h2>LOCAL ASSISTANT</h2>
-      <textarea id="assistantPrompt" placeholder="Örn: objeyi ortala ve reels safe zone ekle"></textarea>
+      <textarea id="assistantPrompt" placeholder="Örn: Vox beyaz logosunu ekle ve reels safe zone aç"></textarea>
       <button id="assistantRun" class="accent">Komutu Çalıştır</button>
-      <div class="tiny">Şimdilik lokal komutlar: ortala, fit, fill, reels, story, 4:5, 16:9, kare, smart object, grupla.</div>
+      <div class="tiny">
+        Lokal komutlar: ortala, fit, fill, reels, story, 4:5, 16:9, kare, smart object, grupla + kayıtlı marka/asset çağırma.
+      </div>
     </section>
 
-    <div id="status" class="status">Hazır</div>
+    <div id="status" class="status">Hafıza hazırlanıyor...</div>
   </div>
   <script src="index.js"></script>
 </body>

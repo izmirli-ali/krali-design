@@ -1,4 +1,4 @@
-// KRALI DESIGN v0.10.4 — single-file runtime bundle
+// KRALI DESIGN v0.11.0 — single-file runtime bundle
 (function () {
   const style = document.createElement("style");
   style.textContent = `* { box-sizing: border-box; }
@@ -1342,6 +1342,84 @@ input[type="checkbox"] {
   document.head.appendChild(v0104Style);
 
 
+  const v0110Style = document.createElement("style");
+  v0110Style.textContent = `
+    /* v0.11.0 scale and safe-zone */
+    .assetTopBtn{
+      width:25px !important;
+      min-width:25px !important;
+      min-height:22px !important;
+      padding:0 !important;
+      font-size:12px !important;
+      line-height:1 !important;
+      background:#111 !important;
+      border:1px solid #353535 !important;
+      border-radius:6px !important;
+    }
+    .assetTopBtn:hover{
+      background:#241010 !important;
+      border-color:#ff4141 !important;
+    }
+    .scaleSection{
+      padding-bottom:7px !important;
+    }
+    .scaleGrid{
+      display:flex !important;
+      align-items:stretch !important;
+      gap:5px !important;
+    }
+    .scalePresetBtn{
+      flex:1 1 0 !important;
+      min-width:0 !important;
+      min-height:52px !important;
+      padding:5px 2px !important;
+      display:flex !important;
+      flex-direction:column !important;
+      align-items:center !important;
+      justify-content:center !important;
+      gap:4px !important;
+      background:#0d0d0d !important;
+      border:1px solid #292929 !important;
+      border-radius:7px !important;
+    }
+    .scalePresetBtn:hover,
+    .scalePresetBtn.active{
+      background:#1c0d0d !important;
+      border-color:#ff4141 !important;
+    }
+    .scaleFrame{
+      display:block !important;
+      flex:0 0 auto !important;
+      border:1px solid #ff4141 !important;
+      border-radius:2px !important;
+      background:transparent !important;
+    }
+    .scaleVertical{width:11px !important;height:23px !important}
+    .scalePost{width:17px !important;height:22px !important}
+    .scaleSquare{width:20px !important;height:20px !important}
+    .scaleHorizontal{width:28px !important;height:16px !important}
+    .scaleText{
+      display:block !important;
+      color:#d8d8d8 !important;
+      font-size:7px !important;
+      line-height:1 !important;
+      font-weight:650 !important;
+    }
+    .safePresetBtn.active{
+      background:#211010 !important;
+      border-color:#ff4141 !important;
+    }
+    .safePresetBtn.active .safeName{
+      color:#ffffff !important;
+    }
+    .safePresetBtn.active .safeRatio{
+      color:#ff7777 !important;
+    }
+  `;
+  document.head.appendChild(v0110Style);
+
+
+
 
 
 
@@ -1353,10 +1431,33 @@ input[type="checkbox"] {
         <div class="sub">Photoshop Workflow Accelerator</div>
       </div>
       <div class="topActions">
+        <button id="placeAssetTop" class="assetTopBtn" title="Dosyadan Asset Ekle">📁</button>
         <button id="updatePlugin" class="updateBtn">↻ Güncelle</button>
-        <div class="version">v0.10.4</div>
+        <div class="version">v0.11.0</div>
       </div>
     </header>
+
+    <section class="scaleSection">
+      <h2>ÖLÇEK</h2>
+      <div class="scaleGrid">
+        <button class="scalePresetBtn" data-scale-preset="vertical" title="1080×1920">
+          <span class="scaleFrame scaleVertical"></span>
+          <span class="scaleText">9:16</span>
+        </button>
+        <button class="scalePresetBtn" data-scale-preset="post45" title="1080×1350">
+          <span class="scaleFrame scalePost"></span>
+          <span class="scaleText">4:5</span>
+        </button>
+        <button class="scalePresetBtn" data-scale-preset="square" title="1080×1080">
+          <span class="scaleFrame scaleSquare"></span>
+          <span class="scaleText">1:1</span>
+        </button>
+        <button class="scalePresetBtn" data-scale-preset="horizontal" title="1920×1080">
+          <span class="scaleFrame scaleHorizontal"></span>
+          <span class="scaleText">16:9</span>
+        </button>
+      </div>
+    </section>
 
     <section>
       <h2>SAFE ZONE</h2>
@@ -1400,15 +1501,9 @@ input[type="checkbox"] {
         <button id="centerV">Dikey Ortala</button>
         <button id="centerLayer">Tam Ortala</button>
       </div>
-      <div class="buttonRow three">
+      <div class="buttonRow two">
         <button id="fitLayer">Fit</button>
         <button id="fillLayer">Fill</button>
-        <button id="placeAsset">Asset</button>
-      </div>
-      <div class="buttonRow three">
-        <button data-widthpct="80">%80</button>
-        <button data-widthpct="90">%90</button>
-        <button data-widthpct="100">%100</button>
       </div>
     </section>
 
@@ -2147,6 +2242,21 @@ async function quickFormat(key) {
 }
 
 
+async function applyScalePreset(key) {
+  const preset = FORMAT_PRESETS[key];
+  if (!preset) throw new Error("Ölçek preset bulunamadı.");
+
+  await modal("Ölçek " + preset.name, async () => {
+    await resizeCanvasTo(preset.width, preset.height);
+  });
+
+  document.querySelectorAll("[data-scale-preset]").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.scalePreset === key);
+  });
+
+  setStatus("✓ " + preset.name + " • " + preset.width + "×" + preset.height);
+}
+
 const SAFE_PRESETS = {
   reels: { name: "Reels 9:16", left: 0.0556, right: 0.1111, top: 0.1146, bottom: 0.1667 },
   story: { name: "Story 9:16", left: 0.0556, right: 0.0556, top: 0.13, bottom: 0.13 },
@@ -2162,24 +2272,39 @@ async function applySafePreset(key) {
 
   await modal("Safe Zone " + preset.name, async () => {
     const doc = getDoc();
-    await clearGuidesInternal();
     const w = px(doc.width);
     const h = px(doc.height);
 
-    doc.guides.add(constants.Direction.VERTICAL, w * preset.left);
-    doc.guides.add(constants.Direction.VERTICAL, w * (1 - preset.right));
-    doc.guides.add(constants.Direction.HORIZONTAL, h * preset.top);
-    doc.guides.add(constants.Direction.HORIZONTAL, h * (1 - preset.bottom));
+    if (w <= 0 || h <= 0) throw new Error("Belge ölçüsü okunamadı.");
+
+    await clearGuidesInternal();
+
+    const guides = [
+      [constants.Direction.VERTICAL, w * preset.left],
+      [constants.Direction.VERTICAL, w * (1 - preset.right)],
+      [constants.Direction.HORIZONTAL, h * preset.top],
+      [constants.Direction.HORIZONTAL, h * (1 - preset.bottom)]
+    ];
+
+    for (const [direction, position] of guides) {
+      doc.guides.add(direction, position);
+    }
   });
 
   lastSafePreset = key;
   guidesVisible = true;
+
+  document.querySelectorAll("[data-safe]").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.safe === key);
+  });
+
   setStatus("✓ " + preset.name + " Safe Zone eklendi");
 }
 
 async function clearGuides() {
   await modal("Guide Temizle", clearGuidesInternal);
   guidesVisible = false;
+  document.querySelectorAll("[data-safe]").forEach(btn => btn.classList.remove("active"));
   setStatus("✓ Guide'lar temizlendi");
 }
 
@@ -2482,7 +2607,7 @@ async function runAssistant() {
 }
 
 
-const CURRENT_VERSION = "0.10.4";
+const CURRENT_VERSION = "0.11.0";
 
 const UPDATE_FILES = ["app.bundle.js"];
 
@@ -2691,10 +2816,6 @@ document.getElementById("centerLayer").addEventListener("click", () => guarded((
 document.getElementById("fitLayer").addEventListener("click", () => guarded(() => scaleAndCenter("fit")));
 document.getElementById("fillLayer").addEventListener("click", () => guarded(() => scaleAndCenter("fill")));
 
-document.querySelectorAll("[data-widthpct]").forEach(btn => {
-  btn.addEventListener("click", () => guarded(() => setWidthPercent(Number(btn.dataset.widthpct))));
-});
-
 document.getElementById("smartObject").addEventListener("click", () => guarded(convertToSmartObject));
 document.getElementById("groupLayers").addEventListener("click", () => guarded(groupSelectedLayers));
 document.getElementById("renameLayer").addEventListener("click", () => guarded(renameSelectedLayer));
@@ -2703,7 +2824,10 @@ document.getElementById("toggleLayerVisible").addEventListener("click", () => gu
 document.getElementById("toggleLayerLock").addEventListener("click", () => guarded(toggleSelectedLayerLock));
 document.getElementById("bringLayerFront").addEventListener("click", () => guarded(() => moveSelectedLayerToEdge("front")));
 document.getElementById("sendLayerBack").addEventListener("click", () => guarded(() => moveSelectedLayerToEdge("back")));
-document.getElementById("placeAsset").addEventListener("click", () => guarded(placeAsset));
+const placeAssetTopBtn = document.getElementById("placeAssetTop");
+if (placeAssetTopBtn) placeAssetTopBtn.addEventListener("click", () => guarded(placeAsset));
+const placeAssetBtn = document.getElementById("placeAsset");
+if (placeAssetBtn) placeAssetBtn.addEventListener("click", () => guarded(placeAsset));
 
 document.getElementById("assistantRun").addEventListener("click", () => guarded(runAssistant));
 document.getElementById("addBrand").addEventListener("click", () => guarded(addBrand));

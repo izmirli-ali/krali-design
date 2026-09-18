@@ -1,4 +1,4 @@
-// KRALI DESIGN v0.10.3 — single-file runtime bundle
+// KRALI DESIGN v0.10.4 — single-file runtime bundle
 (function () {
   const style = document.createElement("style");
   style.textContent = `* { box-sizing: border-box; }
@@ -1329,6 +1329,20 @@ input[type="checkbox"] {
   document.head.appendChild(v0103Style);
 
 
+  const v0104Style = document.createElement("style");
+  v0104Style.textContent = `
+    /* v0.10.4 remove quick format */
+    .formatMode,
+    .formatIcons,
+    .resizeModeState,
+    .modeToggle{
+      display:none !important;
+    }
+  `;
+  document.head.appendChild(v0104Style);
+
+
+
 
 
 
@@ -1340,52 +1354,9 @@ input[type="checkbox"] {
       </div>
       <div class="topActions">
         <button id="updatePlugin" class="updateBtn">↻ Güncelle</button>
-        <div class="version">v0.10.3</div>
+        <div class="version">v0.10.4</div>
       </div>
     </header>
-
-    <section>
-      <h2>HIZLI FORMAT</h2>
-
-      <div class="formatMode">
-        <select id="resizeMode" class="resizeModeState" aria-label="Ölçekleme modu">
-          <option value="smart">Akıllı Uyarla</option>
-          <option value="canvas">Sadece Canvas</option>
-        </select>
-        <div class="modeToggle">
-          <button class="modeBtn active" data-resize-mode="smart">Akıllı</button>
-          <button class="modeBtn" data-resize-mode="canvas">Canvas</button>
-        </div>
-
-        <label class="checkLine">
-          <input id="duplicateBeforeResize" type="checkbox" checked />
-          <span>Önce belgeyi kopyala</span>
-        </label>
-
-        <label class="checkLine">
-          <input id="safeAfterResize" type="checkbox" checked />
-          <span>Uygun Safe Zone ekle</span>
-        </label>
-      </div>
-
-      <div class="formatIcons">
-        <button class="formatIconBtn" data-format="vertical" title="Dikey • 1080×1920">
-          <span class="ratioIcon ratio916"><span class="ratioInner"></span></span>
-        </button>
-
-        <button class="formatIconBtn" data-format="post45" title="Post • 1080×1350">
-          <span class="ratioIcon ratio45"><span class="ratioInner"></span></span>
-        </button>
-
-        <button class="formatIconBtn" data-format="square" title="Kare • 1080×1080">
-          <span class="ratioIcon ratio11"><span class="ratioInner"></span></span>
-        </button>
-
-        <button class="formatIconBtn" data-format="horizontal" title="Yatay • 1920×1080">
-          <span class="ratioIcon ratio169"><span class="ratioInner"></span></span>
-        </button>
-      </div>
-    </section>
 
     <section>
       <h2>SAFE ZONE</h2>
@@ -2511,7 +2482,7 @@ async function runAssistant() {
 }
 
 
-const CURRENT_VERSION = "0.10.3";
+const CURRENT_VERSION = "0.10.4";
 
 const UPDATE_FILES = ["app.bundle.js"];
 
@@ -2701,18 +2672,6 @@ if (refreshDocBtn) refreshDocBtn.addEventListener("click", () => guarded(refresh
 
 document.querySelectorAll("[data-format]").forEach(btn => {
   btn.addEventListener("click", () => guarded(() => quickFormat(btn.dataset.format)));
-});
-
-document.querySelectorAll("[data-resize-mode]").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const mode = btn.dataset.resizeMode;
-    const state = document.getElementById("resizeMode");
-    if (state) state.value = mode;
-    document.querySelectorAll("[data-resize-mode]").forEach(item => {
-      item.classList.toggle("active", item.dataset.resizeMode === mode);
-    });
-    setStatus(mode === "smart" ? "Akıllı Uyarla aktif" : "Sadece Canvas aktif");
-  });
 });
 
 document.querySelectorAll("[data-safe]").forEach(btn => {

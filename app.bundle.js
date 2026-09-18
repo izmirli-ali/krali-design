@@ -1,4 +1,4 @@
-// KRALI DESIGN v0.7.1 — single-file runtime bundle
+// KRALI DESIGN v0.8.0 — single-file runtime bundle
 (function () {
   const style = document.createElement("style");
   style.textContent = `* { box-sizing: border-box; }
@@ -723,6 +723,69 @@ input[type="checkbox"] {
   accentStyle.textContent = `.brandBlock::after{content:"";display:block;width:42px;height:3px;margin-top:7px;border-radius:999px;background:#ff4141;box-shadow:0 0 10px rgba(255,65,65,.28)} .version{color:#ff7a7a !important;font-weight:700}`;
   document.head.appendChild(accentStyle);
 
+  const compactStyle = document.createElement("style");
+  compactStyle.textContent = `
+    .app{padding:10px 10px 18px}
+    .topbar{align-items:center;margin-bottom:7px;gap:8px}
+    .brandBlock::after{width:34px;height:2px;margin-top:5px}
+    .title{font-size:16px;letter-spacing:.35px}
+    .sub{font-size:8px;margin-top:1px}
+    .topActions{gap:7px}
+    .version{
+      padding:3px 7px;
+      border:1px solid #5f2020;
+      border-radius:999px;
+      background:#251010;
+      color:#ff7676 !important;
+      font-size:8px;
+      line-height:1;
+    }
+    .updateBtn{min-height:26px;padding:0 10px;border-radius:999px;font-size:9px}
+    .updaterBar{
+      padding:5px 7px;
+      margin-bottom:7px;
+      border-radius:7px;
+      background:#0f0f0f;
+      font-size:8px;
+    }
+    .updaterLinkBtn{
+      min-height:21px;
+      padding:0 6px;
+      border-radius:999px;
+      font-size:8px;
+      background:transparent;
+    }
+    section{padding:9px;margin-bottom:7px;border-radius:9px}
+    h2{font-size:9px;margin-bottom:7px;letter-spacing:.9px}
+    .docCard{padding:8px 9px}
+    .docInfo{margin-top:6px;padding:7px 8px;font-size:9px;line-height:1.35}
+    .miniBtn{min-height:23px;padding:0 7px}
+    .formatMode{gap:3px;margin-bottom:5px}
+    .formatMode select{min-height:29px;font-size:10px}
+    .checkLine{min-height:21px;font-size:9px;gap:6px}
+    .checkLine input[type="checkbox"]{width:14px;height:14px;min-height:14px;flex-basis:14px}
+    .formatIcons{gap:5px;margin:5px 0 0}
+    .formatIconBtn{min-height:49px;padding:5px 3px;border-radius:8px}
+    .ratio916{width:11px;height:21px}
+    .ratio45{width:16px;height:20px}
+    .ratio11{width:18px;height:18px}
+    .ratio169{width:25px;height:14px}
+    .ratioLabel{font-size:8px}
+    .buttonRow{gap:4px;margin-bottom:4px}
+    .buttonRow button{min-height:29px;font-size:9px;padding:0 6px}
+    textarea,input[type="text"],select{min-height:31px;font-size:10px}
+    textarea{height:62px;padding:7px}
+    .inlineForm{gap:5px;margin-bottom:5px}
+    .divider{margin:8px 0}
+    .memoryItem{padding:6px}
+    .memoryName{font-size:10px}
+    .memorySub,.tiny,.listHead{font-size:8px}
+    .memoryActions button{min-height:24px;font-size:8px}
+    .empty{padding:7px;font-size:9px}
+    .status{padding:7px 8px;font-size:9px;border-radius:7px}
+  `;
+  document.head.appendChild(compactStyle);
+
   document.body.innerHTML = `<div class="app">
     <header class="topbar">
       <div class="brandBlock">
@@ -730,7 +793,7 @@ input[type="checkbox"] {
         <div class="sub">Photoshop Workflow Accelerator</div>
       </div>
       <div class="topActions">
-        <button id="updatePlugin" class="updateBtn">Sürümü Güncelle</button>
+        <button id="updatePlugin" class="updateBtn">Güncelle</button>
         <div class="version">v0.7.0</div>
       </div>
     </header>
@@ -738,7 +801,7 @@ input[type="checkbox"] {
     <div class="updaterBar">
       <span id="updateStatus">Güncelleme sistemi hazır</span>
       <span class="updaterOkBadge">Bundle Updater</span>
-      <button id="resetUpdateFolder" class="updaterLinkBtn">Klasörü Yeniden Seç</button>
+      <button id="resetUpdateFolder" class="updaterLinkBtn">Klasör</button>
     </div>
 
     <section class="docCard">
@@ -1050,6 +1113,10 @@ async function initMemory() {
 
 async function saveMemory() {
   if (!memoryFile) await setUpdateStatus("Mevcut sürüm: v" + CURRENT_VERSION);
+const runtimeVersionEl = document.querySelector(".version");
+if (runtimeVersionEl) runtimeVersionEl.textContent = "v" + CURRENT_VERSION;
+setUpdateStatus("v" + CURRENT_VERSION + " • güncelleme hazır");
+
 initMemory();
   await memoryFile.write(JSON.stringify(memory, null, 2));
 }
@@ -1793,7 +1860,7 @@ async function runAssistant() {
 }
 
 
-const CURRENT_VERSION = "0.7.1";
+const CURRENT_VERSION = "0.8.0";
 
 const UPDATE_FILES = ["app.bundle.js"];
 

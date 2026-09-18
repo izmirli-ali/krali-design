@@ -886,7 +886,7 @@ async function runAssistant() {
 }
 
 
-const CURRENT_VERSION = "0.6.2";
+const CURRENT_VERSION = "0.6.3";
 
 const UPDATE_FILES = [
   "manifest.json",
@@ -956,8 +956,10 @@ async function writeUpdaterSettings(settings) {
 
 async function resetUpdaterFolder() {
   await writeUpdaterSettings({ folderToken: "" });
-  setUpdateStatus("Klasör izni sıfırlandı. Sonraki güncellemede KRALI-DESIGN klasörünü seç.");
-  setStatus("✓ Güncelleme klasörü izni sıfırlandı");
+  setUpdateStatus("KRALI-DESIGN klasörünü seç...");
+  const folder = await getWritablePluginFolder(true);
+  setUpdateStatus("✓ Güncelleme klasörü kaydedildi: " + folder.name);
+  setStatus("✓ Güncelleme klasörü kaydedildi");
 }
 
 async function getWritablePluginFolder(forcePick) {

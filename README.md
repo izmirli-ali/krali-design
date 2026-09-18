@@ -2,6 +2,11 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
+### v0.11.14 — PSD Analizli Üretim Asistanı
+- Üretim Asistanı artık önce PSD'yi analiz eder; canvas/format, Safe Zone, logo kenar riski, canvas dışına taşan ve varsayılan adla kalan layer'ları raporlar.
+- Safe Zone eksikse öneri kartından tek tıkla uygun preset uygulanır; analiz tek başına hiçbir PSD verisini değiştirmez.
+- Yazılı komut alanı, analiz sonrasında isteğe bağlı ek aksiyonlar için korundu.
+
 ### v0.11.13 — Üretim Asistanı odağı
 - Manuel Marka Hafızası ve Tasarım Hafızası bölümleri panelden kaldırıldı.
 - Local Assistant, Üretim Asistanı olarak sadeleştirildi: format + Safe Zone, dosyadan asset ekleme, 3×3 hizalama, Fit ve Fill komutlarını uygular.

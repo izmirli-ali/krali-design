@@ -55,6 +55,10 @@ for obsolete_id in ("brandSelect", "addBrand", "registerAsset", "learnLayout", "
 expect('id="assistantPrompt"' in BUNDLE, "Üretim Asistanı komut alanı eksik.")
 expect('id="assistantRun"' in BUNDLE, "Üretim Asistanı çalıştırma butonu eksik.")
 expect("await placeAsset();" in BUNDLE, "Asistanın dosyadan asset ekleme aksiyonu eksik.")
+expect('id="analyzeDocument"' in BUNDLE, "Belge Analiz Et butonu eksik.")
+expect('id="assistantReport"' in BUNDLE, "Asistan analiz raporu alanı eksik.")
+expect('async function analyzeDocument()' in BUNDLE, "PSD analiz fonksiyonu eksik.")
+expect('Safe Zone\'u Uygula' in BUNDLE, "Safe Zone öneri aksiyonu eksik.")
 
 for key in ("tl", "tc", "tr", "ml", "mc", "mr", "bl", "bc", "br"):
     expect(occurrences(fr'data-align-point="{key}"') == 1, f"Hizalama noktası tam bir kez görünmeli: {key}")

@@ -1,4 +1,4 @@
-// KRALI 100 YILLIK DENEYİM v0.11.13 — single-file runtime bundle
+// KRALI 100 YILLIK DENEYİM v0.11.14 — single-file runtime bundle
 (function () {
   const style = document.createElement("style");
   style.textContent = `* { box-sizing: border-box; }
@@ -1662,6 +1662,19 @@ input[type="checkbox"] {
   `;
   document.head.appendChild(v01111Style);
 
+  const assistantStyle = document.createElement("style");
+  assistantStyle.textContent = `
+    .assistantReport{display:flex;flex-direction:column;gap:6px;margin-top:7px}
+    .assistantItem{padding:8px;border:1px solid #303030;border-radius:7px;background:#0d0d0d}
+    .assistantItem.ok{border-left:3px solid #5aa36d}
+    .assistantItem.warn{border-left:3px solid #ff4141}
+    .assistantItem.info{border-left:3px solid #777}
+    .assistantItemTitle{font-size:10px;color:#ededed;font-weight:700}
+    .assistantItemDetail{margin-top:3px;font-size:9px;line-height:1.35;color:#989898}
+    .assistantAction{margin-top:7px;min-height:25px;padding:0 8px;border:1px solid #ff4141;border-radius:5px;background:#251212;color:#ff8585;font-size:9px}
+  `;
+  document.head.appendChild(assistantStyle);
+
 
 
 
@@ -1764,9 +1777,14 @@ input[type="checkbox"] {
 
     <section>
       <h2>ÜRETİM ASİSTANI</h2>
+      <button id="analyzeDocument" class="accent">Belgeyi Analiz Et</button>
+      <div id="assistantReport" class="assistantReport">
+        <div class="empty">PSD'yi oku; format, Safe Zone ve layer yerleşimi için önerileri burada göster.</div>
+      </div>
+      <div class="divider"></div>
       <textarea id="assistantPrompt" placeholder="Örn: Reels hazırla, asset ekle ve sağ üste %5 payla hizala"></textarea>
-      <button id="assistantRun" class="accent">Asistana Uygulat</button>
-      <div class="tiny">Format, Safe Zone, dosyadan asset ekleme, 3×3 yerleşim, Fit ve Fill komutlarını uygular.</div>
+      <button id="assistantRun" class="primary">Yazılı Komutu Uygula</button>
+      <div class="tiny">Asistan önce belgeyi inceler. İstersen aşağıya doğal dille ek aksiyon yazabilirsin.</div>
     </section>
 
     <div id="status" class="status">KRALI 100 YILLIK DENEYİM hazırlanıyor...</div>
@@ -1791,9 +1809,11 @@ const layoutCount = document.getElementById("layoutCount");
 const docInfo = document.getElementById("docInfo");
 const updateStatusEl = document.getElementById("updateStatus");
 const updateButtonEl = document.getElementById("updatePlugin");
+const assistantReportEl = document.getElementById("assistantReport");
 
 let lastSafePreset = null;
 let guidesVisible = true;
+let lastAnalysis = null;
 let memoryFile = null;
 let memory = { version: 2, selectedBrandId: "", brands: [] };
 
@@ -1859,6 +1879,115 @@ function layerBounds(layer) {
 
 function flattenTopLayers(doc) {
   return Array.from(doc.layers || []);
+}
+
+function closestFormatPreset(width, height) {
+  const ratio = width / height;
+  const formats = [["vertical", 9 / 16], ["post45", 4 / 5], ["square", 1], ["horizontal", 16 / 9]];
+  const [key, target] = formats.reduce((best, candidate) =>
+    Math.abs(ratio - candidate[1]) < Math.abs(ratio - best[1]) ? candidate : best
+  );
+  return { key, exact: Math.abs(ratio - target) < 0.02 };
+}
+
+function safePresetForFormat(formatKey) {
+  return ({ vertical: "reels", post45: "post45", square: "square", horizontal: "wide169" })[formatKey] || "generic916";
+}
+
+function collectAnalysisLayers(layers, result = []) {
+  for (const layer of Array.from(layers || [])) {
+    result.push(layer);
+    if (layer.layers) collectAnalysisLayers(layer.layers, result);
+  }
+  return result;
+}
+
+function addAnalysisItem(container, tone, title, detail, action) {
+  const item = document.createElement("div");
+  item.className = "assistantItem " + tone;
+  const titleEl = document.createElement("div");
+  titleEl.className = "assistantItemTitle";
+  titleEl.textContent = title;
+  const detailEl = document.createElement("div");
+  detailEl.className = "assistantItemDetail";
+  detailEl.textContent = detail;
+  item.append(titleEl, detailEl);
+  if (action) {
+    const button = document.createElement("button");
+    button.className = "assistantAction";
+    button.textContent = action.label;
+    button.addEventListener("click", () => guarded(action.run));
+    item.appendChild(button);
+  }
+  container.appendChild(item);
+}
+
+function renderAnalysis(analysis) {
+  if (!assistantReportEl) return;
+  assistantReportEl.replaceChildren();
+  analysis.items.forEach(item => addAnalysisItem(assistantReportEl, item.tone, item.title, item.detail, item.action));
+}
+
+async function applySuggestedSafeZone() {
+  if (!lastAnalysis) await analyzeDocument();
+  await applySafePreset(lastAnalysis.safePreset);
+  await analyzeDocument();
+}
+
+async function analyzeDocument() {
+  const doc = getDoc();
+  const width = px(doc.width);
+  const height = px(doc.height);
+  const format = closestFormatPreset(width, height);
+  const safePreset = safePresetForFormat(format.key);
+  const hasSafeZone = !!(doc.guides && doc.guides.length >= 4);
+  const marginX = width * 0.05;
+  const marginY = height * 0.05;
+  const items = [];
+
+  items.push({
+    tone: format.exact ? "ok" : "info",
+    title: format.exact ? "Format hazır" : "Özel canvas ölçüsü",
+    detail: Math.round(width) + "×" + Math.round(height) + " px • " + FORMAT_PRESETS[format.key].name
+  });
+  if (!hasSafeZone) {
+    items.push({ tone: "warn", title: "Safe Zone yok", detail: "Bu belge için " + SAFE_PRESETS[safePreset].name + " Safe Zone öneriliyor.", action: { label: "Safe Zone'u Uygula", run: applySuggestedSafeZone } });
+  } else {
+    items.push({ tone: "ok", title: "Safe Zone aktif", detail: "Belgede en az dört rehber bulundu." });
+  }
+
+  const visibleLayers = collectAnalysisLayers(doc.layers).filter(layer => layer.visible !== false);
+  const unnamed = visibleLayers.filter(layer => /^(layer|katman)\s*\d*$/i.test(String(layer.name || "").trim()));
+  const logoLayers = visibleLayers.filter(layer => /logo|logotype|wordmark|marka/i.test(String(layer.name || "")));
+  const outside = [];
+  const edgeRisk = [];
+  for (const layer of visibleLayers) {
+    try {
+      const bounds = layerBounds(layer);
+      const layerWidth = bounds.right - bounds.left;
+      const layerHeight = bounds.bottom - bounds.top;
+      const isBackground = layerWidth >= width * 0.98 && layerHeight >= height * 0.98;
+      if (!isBackground && (bounds.left < 0 || bounds.top < 0 || bounds.right > width || bounds.bottom > height)) outside.push(layer);
+      if (logoLayers.includes(layer) && (bounds.left < marginX || bounds.right > width - marginX || bounds.top < marginY || bounds.bottom > height - marginY)) edgeRisk.push(layer);
+    } catch (_) {}
+  }
+  if (logoLayers.length) {
+    items.push({
+      tone: edgeRisk.length ? "warn" : "ok",
+      title: edgeRisk.length ? "Logo güvenli alana yakın" : "Logo yerleşimi kontrol edildi",
+      detail: edgeRisk.length ? edgeRisk.map(layer => layer.name).join(", ") + " %5 payın içinde veya dışında. Layer'ı seçip Yerleşim pedinden konumlandırabilirsin." : logoLayers.map(layer => layer.name).join(", ") + " güvenli kenar payında görünüyor."
+    });
+  } else {
+    items.push({ tone: "info", title: "Logo tespit edilmedi", detail: "Logo layer'ını 'logo' adıyla isimlendirirsen asistan konum riskini takip eder." });
+  }
+  if (outside.length) items.push({ tone: "warn", title: "Canvas dışına taşan layer var", detail: outside.map(layer => layer.name).join(", ") + ". Bilinçli bir taşma değilse kontrol et." });
+  if (unnamed.length) items.push({ tone: "info", title: "İsimlendirilmemiş layer'lar", detail: unnamed.map(layer => layer.name).join(", ") + ". Anlamlı isimler asistanın analizi için daha güvenilir olur." });
+  if (!outside.length && !unnamed.length) items.push({ tone: "ok", title: "Layer yapısı temiz", detail: visibleLayers.length + " görünür layer tarandı; belirgin taşma veya varsayılan layer adı yok." });
+
+  lastAnalysis = { safePreset, items };
+  renderAnalysis(lastAnalysis);
+  await refreshDocInfo();
+  setStatus("✓ Belge analizi tamamlandı • " + items.length + " bulgu");
 }
 
 async function modal(name, fn) {
@@ -2936,7 +3065,7 @@ async function runAssistant() {
 }
 
 
-const CURRENT_VERSION = "0.11.13";
+const CURRENT_VERSION = "0.11.14";
 
 const UPDATE_FILES = ["app.bundle.js"];
 
@@ -3152,12 +3281,13 @@ if (placeAssetTopBtn) placeAssetTopBtn.addEventListener("click", () => guarded(p
 const placeAssetBtn = document.getElementById("placeAsset");
 if (placeAssetBtn) placeAssetBtn.addEventListener("click", () => guarded(placeAsset));
 
+document.getElementById("analyzeDocument").addEventListener("click", () => guarded(analyzeDocument));
 document.getElementById("assistantRun").addEventListener("click", () => guarded(runAssistant));
 function runUiSelfCheck() {
   const requiredIds = [
     "updatePlugin", "placeAssetTop", "safeZoneToggle",
     "fitLayer", "fillLayer",
-    "assistantRun"
+    "analyzeDocument", "assistantRun", "assistantPrompt", "assistantReport"
   ];
 
   const missing = requiredIds.filter(id => !document.getElementById(id));

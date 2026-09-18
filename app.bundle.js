@@ -1,4 +1,4 @@
-// KRALI DESIGN v0.10.2 — single-file runtime bundle
+// KRALI DESIGN v0.10.3 — single-file runtime bundle
 (function () {
   const style = document.createElement("style");
   style.textContent = `* { box-sizing: border-box; }
@@ -1280,6 +1280,56 @@ input[type="checkbox"] {
   document.head.appendChild(v0102Style);
 
 
+  const v0103Style = document.createElement("style");
+  v0103Style.textContent = `
+    /* v0.10.3 UXP-safe format icons */
+    .formatIcons{
+      display:flex !important;
+      align-items:stretch !important;
+      justify-content:space-between !important;
+      gap:5px !important;
+      margin:5px 0 0 !important;
+    }
+    .formatIconBtn{
+      flex:1 1 0 !important;
+      min-width:0 !important;
+      min-height:54px !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      background:#0c0c0c !important;
+      border:1px solid #272727 !important;
+      border-radius:7px !important;
+      padding:5px 2px !important;
+    }
+    .ratioIcon{
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      box-sizing:border-box !important;
+      border:1px solid #ff4141 !important;
+      background:#171717 !important;
+      border-radius:3px !important;
+      opacity:1 !important;
+      flex:0 0 auto !important;
+    }
+    .ratioInner{
+      display:block !important;
+      width:3px !important;
+      height:3px !important;
+      border-radius:50% !important;
+      background:#ff4141 !important;
+      opacity:.75 !important;
+    }
+    .ratio916{width:15px !important;height:31px !important}
+    .ratio45{width:23px !important;height:29px !important}
+    .ratio11{width:27px !important;height:27px !important}
+    .ratio169{width:37px !important;height:21px !important}
+  `;
+  document.head.appendChild(v0103Style);
+
+
+
 
 
   document.body.innerHTML = `<div class="app">
@@ -1290,7 +1340,7 @@ input[type="checkbox"] {
       </div>
       <div class="topActions">
         <button id="updatePlugin" class="updateBtn">↻ Güncelle</button>
-        <div class="version">v0.10.2</div>
+        <div class="version">v0.10.3</div>
       </div>
     </header>
 
@@ -1320,19 +1370,19 @@ input[type="checkbox"] {
 
       <div class="formatIcons">
         <button class="formatIconBtn" data-format="vertical" title="Dikey • 1080×1920">
-          <span class="ratioIcon ratio916"></span>
+          <span class="ratioIcon ratio916"><span class="ratioInner"></span></span>
         </button>
 
         <button class="formatIconBtn" data-format="post45" title="Post • 1080×1350">
-          <span class="ratioIcon ratio45"></span>
+          <span class="ratioIcon ratio45"><span class="ratioInner"></span></span>
         </button>
 
         <button class="formatIconBtn" data-format="square" title="Kare • 1080×1080">
-          <span class="ratioIcon ratio11"></span>
+          <span class="ratioIcon ratio11"><span class="ratioInner"></span></span>
         </button>
 
         <button class="formatIconBtn" data-format="horizontal" title="Yatay • 1920×1080">
-          <span class="ratioIcon ratio169"></span>
+          <span class="ratioIcon ratio169"><span class="ratioInner"></span></span>
         </button>
       </div>
     </section>
@@ -2461,7 +2511,7 @@ async function runAssistant() {
 }
 
 
-const CURRENT_VERSION = "0.10.2";
+const CURRENT_VERSION = "0.10.3";
 
 const UPDATE_FILES = ["app.bundle.js"];
 

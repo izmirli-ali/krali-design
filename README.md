@@ -2,6 +2,15 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
+### v0.9.1 — Stabilization
+- `saveMemory()` içine yanlışlıkla taşınmış updater kodu temizlendi.
+- Güncelle butonu artık işlem sırasında `disabled` yapılmıyor.
+- Güncelleme durumu doğrudan buton üzerinde gösteriliyor: Kontrol / İndiriliyor / Kuruluyor / Güncel.
+- Butona yüksek z-index ve pointer-events güvenliği eklendi.
+- Akıllı / Canvas segment kontrolü gerçekten HTML'e uygulandı.
+- Safe Zone 3×2 kompakt grid gerçekten HTML'e uygulandı.
+
+
 ### v0.9.0 — UI Refinement
 - Bozuk UXP pseudo-element kırmızı çizgileri kaldırıldı.
 - Güncelle butonu koyu temaya alındı; #FF4141 yalnızca vurgu olarak kullanılıyor.

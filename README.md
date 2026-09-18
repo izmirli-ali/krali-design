@@ -2,6 +2,15 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
+### v0.11.0 — Scale presets + Safe Zone stabilization
+- Panelin en üstüne 9:16, 4:5, 1:1 ve 16:9 küçük ölçek preset kutuları eklendi.
+- Ölçek presetleri canvas'ı sırasıyla 1080×1920, 1080×1350, 1080×1080 ve 1920×1080 ölçülerine geçirir.
+- Asset yerleştirme Yerleşim bölümünden çıkarıldı ve üst bara dosya ikonuyla taşındı.
+- Yerleşim bölümündeki %80 / %90 / %100 kontrolleri kaldırıldı.
+- Safe Zone presetleri guide eklemeden önce mevcut guide'ları temizler ve belge ölçüsünü doğrular.
+- Aktif Safe Zone preset butonu artık görsel olarak işaretlenir; Temizle ile aktif durum sıfırlanır.
+
+
 ### v0.10.4 — Quick Format removed
 - Hızlı Format bölümü panelden tamamen kaldırıldı.
 - Akıllı / Canvas, oran ikonları ve ilgili seçenekler artık arayüzde görünmüyor.

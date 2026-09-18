@@ -2,7 +2,7 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
-## v0.6.0
+## v0.6.1
 
 ### UI düzeltmesi
 - UXP içinde boş görünen CSS Grid yapısı kaldırıldı.
@@ -29,6 +29,12 @@ Photoshop için UXP tabanlı workflow hızlandırma paneli.
 - Checkbox boyut/stil sorunu düzeltildi
 - Durum çubuğu içeriği kapatmayacak şekilde normal akışa alındı
 - Dar panel genişliklerinde butonlar gerektiğinde tek sütuna iner
+
+### Kompakt format ikonları
+- 9:16, 4:5, 1:1 ve 16:9 büyük butonları kaldırıldı.
+- Yerine en-boy oranını görsel olarak gösteren küçük ikon butonları eklendi.
+- Dört format tek satırda daha az yer kaplıyor.
+- Fare üzerinde tam çözünürlük bilgisi tooltip olarak görünür.
 
 ### Hızlı Format / Smart Resize
 - Dikey 9:16 → 1080×1920
@@ -82,4 +88,4 @@ Panel sağ üstündeki **Sürümü Güncelle** butonunu kullan.
 
 UXP Developer Tool'da **Load & Watch** açık olmalıdır.
 
-v0.6.0 manifestte network izni ekler; bu sürümü ilk kez aldıktan sonra bir kez Unload → Load & Watch gerekir.
+v0.6.1 manifest değiştirmez; panel içindeki Sürümü Güncelle butonu ile alınabilir.

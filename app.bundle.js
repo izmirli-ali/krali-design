@@ -1,4 +1,4 @@
-// KRALI DESIGN v0.8.0 — single-file runtime bundle
+// KRALI DESIGN v0.8.1 — single-file runtime bundle
 (function () {
   const style = document.createElement("style");
   style.textContent = `* { box-sizing: border-box; }
@@ -786,6 +786,48 @@ input[type="checkbox"] {
   `;
   document.head.appendChild(compactStyle);
 
+
+  const finalUiStyle = document.createElement("style");
+  finalUiStyle.textContent = `
+    /* v0.8.1 final UI cleanup */
+    .topbar{
+      padding:2px 1px 4px;
+      border-bottom:1px solid #231010;
+    }
+    .topActions{
+      margin-left:auto;
+    }
+    .updateBtn{
+      background:#ff4141 !important;
+      border-color:#ff4141 !important;
+      min-width:auto;
+      padding:0 11px;
+      box-shadow:none;
+    }
+    .updateBtn:hover{
+      background:#ff5a5a !important;
+      border-color:#ff5a5a !important;
+    }
+    .version{
+      min-width:auto;
+      white-space:nowrap;
+    }
+    section{
+      box-shadow:none;
+    }
+    .docInfo{
+      background:#0b0b0b;
+    }
+    .formatIconBtn{
+      min-height:46px !important;
+    }
+    .status{
+      background:#0d0d0d;
+      border-color:#241414;
+    }
+  `;
+  document.head.appendChild(finalUiStyle);
+
   document.body.innerHTML = `<div class="app">
     <header class="topbar">
       <div class="brandBlock">
@@ -794,15 +836,9 @@ input[type="checkbox"] {
       </div>
       <div class="topActions">
         <button id="updatePlugin" class="updateBtn">Güncelle</button>
-        <div class="version">v0.7.0</div>
+        <div class="version">v0.8.1</div>
       </div>
     </header>
-
-    <div class="updaterBar">
-      <span id="updateStatus">Güncelleme sistemi hazır</span>
-      <span class="updaterOkBadge">Bundle Updater</span>
-      <button id="resetUpdateFolder" class="updaterLinkBtn">Klasör</button>
-    </div>
 
     <section class="docCard">
       <div class="sectionHead">
@@ -852,10 +888,6 @@ input[type="checkbox"] {
           <span class="ratioIcon ratio169"></span>
           <span class="ratioLabel">16:9</span>
         </button>
-      </div>
-
-      <div class="tiny">
-        Akıllı Uyarla: layer konumlarını ve boyutlarını oranlı olarak yeni formata taşır. İlk sürüm üst seviye layer'larda çalışır.
       </div>
     </section>
 
@@ -1860,7 +1892,7 @@ async function runAssistant() {
 }
 
 
-const CURRENT_VERSION = "0.8.0";
+const CURRENT_VERSION = "0.8.1";
 
 const UPDATE_FILES = ["app.bundle.js"];
 
@@ -2007,7 +2039,7 @@ async function updatePluginFromGitHub() {
     const remoteVersion = await checkRemoteVersion();
 
     if (compareVersions(remoteVersion, CURRENT_VERSION) <= 0) {
-      setStatus("✓ Güncelleme gerekmiyor");
+      setStatus("✓ Güncel sürüm: v" + CURRENT_VERSION);
       return;
     }
 
@@ -2044,7 +2076,6 @@ async function guarded(fn) {
 }
 
 document.getElementById("updatePlugin").addEventListener("click", () => guarded(updatePluginFromGitHub));
-document.getElementById("resetUpdateFolder").addEventListener("click", () => guarded(resetUpdaterFolder));
 document.getElementById("refreshDoc").addEventListener("click", () => guarded(refreshDocInfo));
 
 document.querySelectorAll("[data-format]").forEach(btn => {
@@ -2088,5 +2119,8 @@ brandSelect.addEventListener("change", () => guarded(async () => {
   setStatus(brand ? "✓ Aktif marka: " + brand.name : "Marka seçilmedi");
 }));
 
+const runtimeVersionEl = document.querySelector(".version");
+if (runtimeVersionEl) runtimeVersionEl.textContent = "v" + CURRENT_VERSION;
+setStatus("KRALI DESIGN v" + CURRENT_VERSION + " hazır");
 initMemory();
 

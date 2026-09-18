@@ -8,11 +8,40 @@ const batchPlay = photoshop.action.batchPlay;
 const fs = storage.localFileSystem;
 
 const statusEl = document.getElementById("status");
+const brandSelect = document.getElementById("brandSelect");
+const assetList = document.getElementById("assetList");
+const assetCount = document.getElementById("assetCount");
+
 let lastSafePreset = null;
 let guidesVisible = true;
+let memoryFile = null;
+let memory = { version: 1, selectedBrandId: "", brands: [] };
+
+const ASSET_TYPES = {
+  logo: "Logo",
+  product: "Ürün",
+  background: "Background",
+  decor: "Dekor",
+  other: "Diğer"
+};
 
 function setStatus(msg) {
   statusEl.textContent = msg;
+}
+
+function uid(prefix) {
+  return prefix + "_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
+}
+
+function normalizeText(value) {
+  return String(value || "")
+    .toLocaleLowerCase("tr-TR")
+    .replace(/ı/g, "i")
+    .replace(/ğ/g, "g")
+    .replace(/ü/g, "u")
+    .replace(/ş/g, "s")
+    .replace(/ö/g, "o")
+    .replace(/ç/g, "c");
 }
 
 function px(v) {
@@ -52,6 +81,243 @@ function layerBounds(layer) {
 
 async function modal(name, fn) {
   return await core.executeAsModal(fn, { commandName: "KRALI - " + name });
+}
+
+async function initMemory() {
+  try {
+    const folder = await fs.getDataFolder();
+
+    try {
+      memoryFile = await folder.getEntry("krali-memory.json");
+    } catch (_) {
+      memoryFile = await folder.createFile("krali-memory.json", { overwrite: false });
+      await memoryFile.write(JSON.stringify(memory, null, 2));
+    }
+
+    try {
+      const raw = await memoryFile.read();
+      if (raw && raw.trim()) {
+        const parsed = JSON.parse(raw);
+        if (parsed && Array.isArray(parsed.brands)) {
+          memory = parsed;
+        }
+      }
+    } catch (err) {
+      console.warn("Memory read failed:", err);
+    }
+
+    renderBrands();
+    setStatus("✓ KRALI hafızası hazır");
+  } catch (err) {
+    console.error(err);
+    setStatus("Hafıza hatası: " + err.message);
+  }
+}
+
+async function saveMemory() {
+  if (!memoryFile) {
+    await initMemory();
+  }
+  await memoryFile.write(JSON.stringify(memory, null, 2));
+}
+
+function getSelectedBrand() {
+  const id = brandSelect.value || memory.selectedBrandId;
+  return memory.brands.find(b => b.id === id) || null;
+}
+
+function renderBrands() {
+  while (brandSelect.options.length > 1) {
+    brandSelect.remove(1);
+  }
+
+  memory.brands.forEach(brand => {
+    const option = document.createElement("option");
+    option.value = brand.id;
+    option.textContent = brand.name;
+    brandSelect.appendChild(option);
+  });
+
+  if (memory.selectedBrandId && memory.brands.some(b => b.id === memory.selectedBrandId)) {
+    brandSelect.value = memory.selectedBrandId;
+  } else if (memory.brands.length) {
+    memory.selectedBrandId = memory.brands[0].id;
+    brandSelect.value = memory.selectedBrandId;
+  } else {
+    brandSelect.value = "";
+  }
+
+  renderAssets();
+}
+
+function renderAssets() {
+  while (assetList.firstChild) {
+    assetList.removeChild(assetList.firstChild);
+  }
+
+  const brand = getSelectedBrand();
+  const assets = brand ? brand.assets || [] : [];
+  assetCount.textContent = String(assets.length);
+
+  if (!brand) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = "Önce bir marka oluştur.";
+    assetList.appendChild(empty);
+    return;
+  }
+
+  if (!assets.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = brand.name + " için henüz kayıtlı asset yok.";
+    assetList.appendChild(empty);
+    return;
+  }
+
+  assets.forEach(asset => {
+    const row = document.createElement("div");
+    row.className = "assetItem";
+
+    const meta = document.createElement("div");
+    meta.className = "assetMeta";
+
+    const name = document.createElement("div");
+    name.className = "assetName";
+    name.textContent = asset.name;
+
+    const type = document.createElement("div");
+    type.className = "assetType";
+    type.textContent = ASSET_TYPES[asset.type] || asset.type;
+
+    meta.appendChild(name);
+    meta.appendChild(type);
+
+    const actions = document.createElement("div");
+    actions.className = "assetActions";
+
+    const addBtn = document.createElement("button");
+    addBtn.textContent = "Ekle";
+    addBtn.addEventListener("click", () => guarded(() => placeMemoryAsset(asset)));
+
+    const delBtn = document.createElement("button");
+    delBtn.textContent = "×";
+    delBtn.className = "danger";
+    delBtn.addEventListener("click", () => guarded(() => deleteMemoryAsset(asset.id)));
+
+    actions.appendChild(addBtn);
+    actions.appendChild(delBtn);
+
+    row.appendChild(meta);
+    row.appendChild(actions);
+    assetList.appendChild(row);
+  });
+}
+
+async function addBrand() {
+  const input = document.getElementById("newBrandName");
+  const name = input.value.trim();
+  if (!name) throw new Error("Marka adını yaz.");
+
+  const existing = memory.brands.find(b => normalizeText(b.name) === normalizeText(name));
+  if (existing) {
+    memory.selectedBrandId = existing.id;
+    brandSelect.value = existing.id;
+    renderAssets();
+    throw new Error("Bu marka zaten kayıtlı.");
+  }
+
+  const brand = { id: uid("brand"), name, assets: [], layouts: [] };
+  memory.brands.push(brand);
+  memory.selectedBrandId = brand.id;
+  input.value = "";
+
+  await saveMemory();
+  renderBrands();
+  setStatus("✓ Marka oluşturuldu: " + name);
+}
+
+async function registerAsset() {
+  const brand = getSelectedBrand();
+  if (!brand) throw new Error("Önce marka seç.");
+
+  const file = await fs.getFileForOpening({
+    allowMultiple: false,
+    types: ["png", "jpg", "jpeg", "webp", "tif", "tiff", "psd", "psb", "svg"]
+  });
+
+  if (!file) {
+    setStatus("Asset seçimi iptal edildi");
+    return;
+  }
+
+  const nameInput = document.getElementById("assetName");
+  const typeInput = document.getElementById("assetType");
+  const token = await fs.createPersistentToken(file);
+
+  const asset = {
+    id: uid("asset"),
+    name: nameInput.value.trim() || file.name,
+    type: typeInput.value || "other",
+    fileName: file.name,
+    token,
+    createdAt: new Date().toISOString()
+  };
+
+  brand.assets = brand.assets || [];
+  brand.assets.push(asset);
+  nameInput.value = "";
+
+  await saveMemory();
+  renderAssets();
+  setStatus("✓ " + asset.name + " hafızaya kaydedildi");
+}
+
+async function deleteMemoryAsset(assetId) {
+  const brand = getSelectedBrand();
+  if (!brand) return;
+  brand.assets = (brand.assets || []).filter(a => a.id !== assetId);
+  await saveMemory();
+  renderAssets();
+  setStatus("✓ Asset hafızadan kaldırıldı");
+}
+
+async function placeEntry(entry, commandName) {
+  const sessionToken = fs.createSessionToken(entry);
+
+  await modal(commandName, async () => {
+    await batchPlay(
+      [{
+        _obj: "placeEvent",
+        null: { _path: sessionToken, _kind: "local" },
+        freeTransformCenterState: {
+          _enum: "quadCenterState",
+          _value: "QCSAverage"
+        },
+        offset: {
+          _obj: "offset",
+          horizontal: { _unit: "pixelsUnit", _value: 0 },
+          vertical: { _unit: "pixelsUnit", _value: 0 }
+        },
+        _options: { dialogOptions: "dontDisplay" }
+      }],
+      {}
+    );
+  });
+}
+
+async function placeMemoryAsset(asset) {
+  getDoc();
+
+  let entry;
+  try {
+    entry = await fs.getEntryForPersistentToken(asset.token);
+  } catch (_) {
+    throw new Error(asset.name + " dosyası bulunamadı. Dosya taşınmış veya izin geçersiz olabilir.");
+  }
+
+  await placeEntry(entry, "Asset " + asset.name);
+  setStatus("✓ " + asset.name + " eklendi");
 }
 
 async function clearGuidesInternal() {
@@ -110,8 +376,6 @@ async function toggleGuides() {
   } else {
     if (!lastSafePreset) throw new Error("Önce bir Safe Zone preset seç.");
     await applySafePreset(lastSafePreset);
-    guidesVisible = true;
-    setStatus("✓ Safe Zone tekrar gösterildi");
   }
 }
 
@@ -126,10 +390,10 @@ async function centerSelectedLayer() {
     const docW = px(doc.width);
     const docH = px(doc.height);
 
-    const dx = ((docW - layerW) / 2) - b.left;
-    const dy = ((docH - layerH) / 2) - b.top;
-
-    await layer.translate(dx, dy);
+    await layer.translate(
+      ((docW - layerW) / 2) - b.left,
+      ((docH - layerH) / 2) - b.top
+    );
   });
   setStatus("✓ Layer ortalandı");
 }
@@ -150,9 +414,8 @@ async function scaleAndCenter(mode) {
     const sx = docW / layerW;
     const sy = docH / layerH;
     const scale = mode === "fill" ? Math.max(sx, sy) : Math.min(sx, sy);
-    const percent = scale * 100;
 
-    await layer.scale(percent, percent, constants.AnchorPosition.MIDDLECENTER);
+    await layer.scale(scale * 100, scale * 100, constants.AnchorPosition.MIDDLECENTER);
 
     b = layerBounds(layer);
     const nw = b.right - b.left;
@@ -246,36 +509,59 @@ async function placeAsset() {
     return;
   }
 
-  const token = fs.createSessionToken(file);
-
-  await modal("Asset Ekle", async () => {
-    await batchPlay(
-      [{
-        _obj: "placeEvent",
-        null: { _path: token, _kind: "local" },
-        freeTransformCenterState: {
-          _enum: "quadCenterState",
-          _value: "QCSAverage"
-        },
-        offset: {
-          _obj: "offset",
-          horizontal: { _unit: "pixelsUnit", _value: 0 },
-          vertical: { _unit: "pixelsUnit", _value: 0 }
-        },
-        _options: { dialogOptions: "dontDisplay" }
-      }],
-      {}
-    );
-  });
-
+  await placeEntry(file, "Dosyadan Asset");
   setStatus("✓ Asset Smart Object olarak eklendi");
 }
 
+function findBrandFromCommand(input) {
+  const normalizedInput = normalizeText(input);
+  return memory.brands.find(brand => normalizedInput.includes(normalizeText(brand.name))) || null;
+}
+
+function findAssetFromCommand(brand, input) {
+  if (!brand || !brand.assets) return null;
+  const normalizedInput = normalizeText(input);
+
+  const direct = brand.assets.find(asset => normalizedInput.includes(normalizeText(asset.name)));
+  if (direct) return direct;
+
+  const typeHints = [
+    ["logo", ["logo"]],
+    ["product", ["urun", "product"]],
+    ["background", ["background", "arka plan", "arkaplan"]],
+    ["decor", ["dekor", "decor"]]
+  ];
+
+  for (const [type, hints] of typeHints) {
+    if (hints.some(h => normalizedInput.includes(h))) {
+      const typed = brand.assets.find(asset => asset.type === type);
+      if (typed) return typed;
+    }
+  }
+
+  return null;
+}
+
 async function runAssistant() {
-  const input = document.getElementById("assistantPrompt").value.trim().toLocaleLowerCase("tr-TR");
+  const raw = document.getElementById("assistantPrompt").value.trim();
+  const input = normalizeText(raw);
   if (!input) throw new Error("Bir komut yaz.");
 
   let didSomething = false;
+
+  const commandBrand = findBrandFromCommand(raw);
+  if (commandBrand) {
+    memory.selectedBrandId = commandBrand.id;
+    brandSelect.value = commandBrand.id;
+    await saveMemory();
+    renderAssets();
+
+    const commandAsset = findAssetFromCommand(commandBrand, raw);
+    if (commandAsset) {
+      await placeMemoryAsset(commandAsset);
+      didSomething = true;
+    }
+  }
 
   if (input.includes("reels")) {
     await applySafePreset("reels");
@@ -307,7 +593,7 @@ async function runAssistant() {
   if (input.includes("fill") || input.includes("doldur")) {
     await scaleAndCenter("fill");
     didSomething = true;
-  } else if (input.includes("fit") || input.includes("sığdır") || input.includes("sigdir")) {
+  } else if (input.includes("fit") || input.includes("sigdir")) {
     await scaleAndCenter("fit");
     didSomething = true;
   } else if (input.includes("ortala") || input.includes("merkez")) {
@@ -316,7 +602,7 @@ async function runAssistant() {
   }
 
   if (!didSomething) {
-    throw new Error("Bu komutu henüz tanımıyorum.");
+    throw new Error("Komut anlaşılmadı veya eşleşen kayıtlı asset bulunamadı.");
   }
 
   setStatus("✓ Lokal Assistant komutu tamamlandı");
@@ -350,3 +636,15 @@ document.getElementById("groupLayers").addEventListener("click", () => guarded(g
 document.getElementById("renameLayer").addEventListener("click", () => guarded(renameSelectedLayer));
 document.getElementById("placeAsset").addEventListener("click", () => guarded(placeAsset));
 document.getElementById("assistantRun").addEventListener("click", () => guarded(runAssistant));
+document.getElementById("addBrand").addEventListener("click", () => guarded(addBrand));
+document.getElementById("registerAsset").addEventListener("click", () => guarded(registerAsset));
+
+brandSelect.addEventListener("change", () => guarded(async () => {
+  memory.selectedBrandId = brandSelect.value;
+  await saveMemory();
+  renderAssets();
+  const brand = getSelectedBrand();
+  setStatus(brand ? "✓ Aktif marka: " + brand.name : "Marka seçilmedi");
+}));
+
+initMemory();

@@ -514,3 +514,202 @@ section {
 .checkLine input[type="checkbox"]:disabled + span {
   color: #8a8a8a !important;
 }
+
+
+/* v0.6.5 — KRALI black + #FF4141 theme */
+:root {
+  --krali-bg: #0b0b0b;
+  --krali-surface: #141414;
+  --krali-surface-2: #1b1b1b;
+  --krali-surface-3: #222222;
+  --krali-border: #2d2d2d;
+  --krali-border-strong: #3a3a3a;
+  --krali-text: #f5f5f5;
+  --krali-muted: #9a9a9a;
+  --krali-accent: #ff4141;
+  --krali-accent-soft: #3a1515;
+  --krali-accent-hover: #ff5c5c;
+}
+
+html,
+body {
+  background: var(--krali-bg);
+  color: var(--krali-text);
+}
+
+body {
+  background:
+    linear-gradient(180deg, #0a0a0a 0%, #101010 100%);
+}
+
+.title {
+  color: #ffffff;
+}
+
+.sub,
+.version,
+.tiny,
+.memorySub,
+.listHead {
+  color: var(--krali-muted);
+}
+
+section {
+  background: var(--krali-surface);
+  border-color: var(--krali-border);
+}
+
+h2 {
+  color: #d6d6d6;
+}
+
+button {
+  background: var(--krali-surface-3);
+  border-color: var(--krali-border-strong);
+  color: var(--krali-text);
+}
+
+button:hover {
+  background: #2a2a2a;
+  border-color: var(--krali-accent);
+}
+
+button:focus,
+select:focus,
+input[type="text"]:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--krali-accent) !important;
+}
+
+button.primary,
+button.secondary {
+  background: #1d1d1d;
+  border-color: #343434;
+}
+
+button.primary:hover,
+button.secondary:hover {
+  background: var(--krali-accent-soft);
+  border-color: var(--krali-accent);
+}
+
+button.accent,
+.updateBtn {
+  background: var(--krali-accent);
+  border-color: var(--krali-accent);
+  color: #ffffff;
+}
+
+button.accent:hover,
+.updateBtn:hover {
+  background: var(--krali-accent-hover);
+  border-color: var(--krali-accent-hover);
+}
+
+button.danger {
+  background: #2a1212;
+  border-color: #5a2020;
+  color: #ffd6d6;
+}
+
+button.danger:hover {
+  background: #3a1616;
+  border-color: var(--krali-accent);
+}
+
+textarea,
+input[type="text"],
+select,
+.formatMode select {
+  background: #101010 !important;
+  border-color: #343434 !important;
+  color: #ffffff !important;
+}
+
+select option,
+.formatMode select option {
+  background: #101010;
+  color: #ffffff;
+}
+
+input[type="checkbox"] {
+  accent-color: var(--krali-accent);
+}
+
+.docInfo,
+.memoryItem,
+.empty,
+.status,
+.updaterBar {
+  background: #101010;
+  border-color: var(--krali-border);
+}
+
+.docInfo,
+.memoryName,
+.status {
+  color: #e7e7e7;
+}
+
+.divider {
+  background: #2a2a2a;
+}
+
+.formatIconBtn {
+  background: #171717;
+  border-color: #303030;
+}
+
+.formatIconBtn:hover {
+  background: var(--krali-accent-soft);
+  border-color: var(--krali-accent);
+}
+
+.ratioIcon {
+  border-color: var(--krali-accent);
+}
+
+.ratioLabel {
+  color: #efefef;
+}
+
+.updaterBar {
+  color: #b8b8b8;
+}
+
+.updaterOkBadge {
+  background: var(--krali-accent-soft);
+  border-color: #7a2424;
+  color: #ffdcdc;
+}
+
+.updaterLinkBtn {
+  background: #181818;
+  border-color: #353535;
+  color: #d0d0d0;
+}
+
+.updaterLinkBtn:hover {
+  background: var(--krali-accent-soft);
+  border-color: var(--krali-accent);
+  color: #ffffff;
+}
+
+.checkLine,
+.checkLine span {
+  color: #d4d4d4 !important;
+}
+
+.memoryActions button {
+  background: #1d1d1d;
+}
+
+.memoryActions button:hover {
+  border-color: var(--krali-accent);
+}
+
+::selection {
+  background: var(--krali-accent);
+  color: #ffffff;
+}

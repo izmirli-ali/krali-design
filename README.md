@@ -2,6 +2,13 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
+### v0.10.3 — Quick Format icon fix
+- UXP içinde görünmeyen Grid tabanlı oran ikonları Flexbox yapısına geçirildi.
+- 9:16 / 4:5 / 1:1 / 16:9 yazıları geri getirilmeden oran çerçeveleri görünür hale getirildi.
+- Her oran ikonuna kırmızı merkez işareti eklendi; boş kutu gibi görünmesi engellendi.
+- Hızlı Format fonksiyonları değişmedi: Akıllı / Canvas, belgeyi kopyala ve Safe Zone seçenekleri korunuyor.
+
+
 ### v0.10.2 — Quick Format cleanup
 - Aktif Belge kartı kaldırıldı; işlevsel aksiyon içermediği için panelde yer kaplamıyor.
 - Hızlı Format butonlarındaki 9:16 / 4:5 / 1:1 / 16:9 metinleri kaldırıldı.

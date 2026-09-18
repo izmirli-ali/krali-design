@@ -1,4 +1,4 @@
-// KRALI 100 YILLIK DENEYİM v0.11.3 — single-file runtime bundle
+// KRALI 100 YILLIK DENEYİM v0.11.4 — single-file runtime bundle
 (function () {
   const style = document.createElement("style");
   style.textContent = `* { box-sizing: border-box; }
@@ -1559,7 +1559,7 @@ input[type="checkbox"] {
       <div class="topActions">
         <button id="placeAssetTop" class="assetTopBtn" title="Dosyadan Asset Ekle">📁</button>
         <button id="updatePlugin" class="updateBtn">↻ Güncelle</button>
-        <div class="version">v0.11.3</div>
+        <div class="version">v0.11.4</div>
       </div>
     </header>
 
@@ -2423,16 +2423,11 @@ async function applyScalePreset(key) {
   setStatus(preset.name + " canvas uygulanıyor...");
 
   await modal("Canvas " + preset.name, async () => {
-    await batchPlay(
-      [{
-        _obj: "canvasSize",
-        width: { _unit: "pixelsUnit", _value: preset.width },
-        height: { _unit: "pixelsUnit", _value: preset.height },
-        horizontal: { _enum: "horizontalLocation", _value: "center" },
-        vertical: { _enum: "verticalLocation", _value: "center" },
-        _options: { dialogOptions: "dontDisplay" }
-      }],
-      {}
+    const doc = getDoc();
+    await doc.resizeCanvas(
+      preset.width,
+      preset.height,
+      constants.AnchorPosition.MIDDLECENTER
     );
   });
 
@@ -2476,6 +2471,22 @@ function setSafeToggleUi(on) {
   if (state) state.textContent = on ? "Gösteriliyor" : "Gizli";
 }
 
+function inferSafePresetFromDocument() {
+  const doc = getDoc();
+  const w = px(doc.width);
+  const h = px(doc.height);
+  if (w <= 0 || h <= 0) return "generic916";
+
+  const ratio = w / h;
+  const near = (a, target, tolerance = 0.035) => Math.abs(a - target) <= tolerance;
+
+  if (near(ratio, 9 / 16)) return "reels";
+  if (near(ratio, 4 / 5)) return "post45";
+  if (near(ratio, 1)) return "square";
+  if (near(ratio, 16 / 9)) return "wide169";
+  return ratio < 1 ? "generic916" : "wide169";
+}
+
 async function applySafePreset(key) {
   const preset = SAFE_PRESETS[key];
   if (!preset) throw new Error("Safe Zone preset bulunamadı.");
@@ -2504,7 +2515,11 @@ async function applySafePreset(key) {
   lastSafePreset = key;
   guidesVisible = true;
 
-  document.querySelectorAll("[data-safe]").forEach(btn => {
+  document.querySelectorAll("[data-scale-preset]").forEach(btn => {
+  btn.addEventListener("click", () => guarded(() => applyScalePreset(btn.dataset.scalePreset)));
+});
+
+document.querySelectorAll("[data-safe]").forEach(btn => {
     btn.classList.toggle("active", btn.dataset.safe === key);
   });
 
@@ -2530,7 +2545,7 @@ async function toggleSafeZone() {
   }
 
   if (!lastSafePreset) {
-    throw new Error("Önce bir Safe Zone preset seç.");
+    lastSafePreset = inferSafePresetFromDocument();
   }
 
   await applySafePreset(lastSafePreset);
@@ -2861,7 +2876,7 @@ async function runAssistant() {
 }
 
 
-const CURRENT_VERSION = "0.11.3";
+const CURRENT_VERSION = "0.11.4";
 
 const UPDATE_FILES = ["app.bundle.js"];
 
@@ -3049,10 +3064,6 @@ document.getElementById("updatePlugin").addEventListener("click", () => guarded(
 const refreshDocBtn = document.getElementById("refreshDoc");
 if (refreshDocBtn) refreshDocBtn.addEventListener("click", () => guarded(refreshDocInfo));
 
-document.querySelectorAll("[data-format]").forEach(btn => {
-  btn.addEventListener("click", () => guarded(() => quickFormat(btn.dataset.format)));
-});
-
 document.querySelectorAll("[data-safe]").forEach(btn => {
   btn.addEventListener("click", () => guarded(() => applySafePreset(btn.dataset.safe)));
 });
@@ -3100,6 +3111,32 @@ brandSelect.addEventListener("change", () => guarded(async () => {
   const brand = getSelectedBrand();
   setStatus(brand ? "✓ Aktif marka: " + brand.name : "Marka seçilmedi");
 }));
+
+function runUiSelfCheck() {
+  const requiredIds = [
+    "updatePlugin", "placeAssetTop", "safeZoneToggle",
+    "centerH", "centerV", "centerLayer", "fitLayer", "fillLayer",
+    "distributeH", "distributeV",
+    "smartObject", "groupLayers", "renameLayer", "duplicateLayer",
+    "toggleLayerVisible", "toggleLayerLock", "bringLayerFront", "sendLayerBack",
+    "assistantRun", "addBrand", "registerAsset", "learnLayout"
+  ];
+
+  const missing = requiredIds.filter(id => !document.getElementById(id));
+  const scaleCount = document.querySelectorAll("[data-scale-preset]").length;
+  const safeCount = document.querySelectorAll("[data-safe]").length;
+
+  if (missing.length || scaleCount !== 4 || safeCount !== 6) {
+    console.error("KRALI UI self-check failed", { missing, scaleCount, safeCount });
+    setStatus("UI kontrol hatası • eksik: " + missing.join(", "));
+    return false;
+  }
+
+  console.log("KRALI UI self-check OK", { controls: requiredIds.length, scaleCount, safeCount });
+  return true;
+}
+
+runUiSelfCheck();
 
 const runtimeVersionEl = document.querySelector(".version");
 if (runtimeVersionEl) runtimeVersionEl.textContent = "v" + CURRENT_VERSION;

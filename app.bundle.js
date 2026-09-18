@@ -1,4 +1,4 @@
-// KRALI 100 YILLIK DENEYİM v0.11.8 — single-file runtime bundle
+// KRALI 100 YILLIK DENEYİM v0.11.9 — single-file runtime bundle
 (function () {
   const style = document.createElement("style");
   style.textContent = `* { box-sizing: border-box; }
@@ -1543,6 +1543,46 @@ input[type="checkbox"] {
   document.head.appendChild(v0112Style);
 
 
+  const v0119Style = document.createElement("style");
+  v0119Style.textContent = `
+    /* v0.11.9 simple placement */
+    .alignGrid{display:none !important}
+    .alignPad{
+      display:flex !important;
+      flex-wrap:wrap !important;
+      gap:4px !important;
+      margin:6px 0 !important;
+      padding:4px !important;
+      border:1px solid #262626 !important;
+      border-radius:8px !important;
+      background:#0a0a0a !important;
+    }
+    .alignPad button{
+      flex:1 1 30% !important;
+      min-width:28% !important;
+      min-height:30px !important;
+      padding:0 !important;
+      font-size:13px !important;
+      background:#111 !important;
+      border-color:#292929 !important;
+      border-radius:6px !important;
+    }
+    .alignPad button:hover,
+    .alignPad .alignCenter{
+      border-color:#5a2020 !important;
+    }
+    .alignPad .alignCenter{
+      color:#ff6f6f !important;
+      background:#1b0d0d !important;
+    }
+    .placementScaleRow{
+      margin-top:4px !important;
+    }
+  `;
+  document.head.appendChild(v0119Style);
+
+
+
 
 
 
@@ -1559,7 +1599,7 @@ input[type="checkbox"] {
       <div class="topActions">
         <button id="placeAssetTop" class="assetTopBtn" title="Dosyadan Asset Ekle">📁</button>
         <button id="updatePlugin" class="updateBtn">↻ Güncelle</button>
-        <div class="version">v0.11.8</div>
+        <div class="version">v0.11.9</div>
       </div>
     </header>
 
@@ -1615,7 +1655,7 @@ input[type="checkbox"] {
         </label>
       </div>
 
-      <div class="alignGrid">
+      <div class="alignPad">
         <button data-align-point="tl" title="Sol Üst">↖</button>
         <button data-align-point="tc" title="Üst Orta">↑</button>
         <button data-align-point="tr" title="Sağ Üst">↗</button>
@@ -1627,35 +1667,9 @@ input[type="checkbox"] {
         <button data-align-point="br" title="Sağ Alt">↘</button>
       </div>
 
-      <div class="buttonRow three">
-        <button id="centerH">Yatay Ortala</button>
-        <button id="centerV">Dikey Ortala</button>
-        <button id="centerLayer">Tam Ortala</button>
-      </div>
-      <div class="buttonRow two">
+      <div class="buttonRow two placementScaleRow">
         <button id="fitLayer">Fit</button>
         <button id="fillLayer">Fill</button>
-      </div>
-      <div class="buttonRow two distributeRow">
-        <button id="distributeH">Dağıt ↔</button>
-        <button id="distributeV">Dağıt ↕</button>
-      </div>
-    </section>
-
-    <section>
-      <h2>LAYER</h2>
-      <div class="buttonRow two">
-        <button id="smartObject">Smart Object</button>
-        <button id="groupLayers">Grupla</button>
-        <button id="renameLayer">Adlandır</button>
-        <button id="duplicateLayer">Kopyala</button>
-      </div>
-
-      <div class="buttonRow four layerQuickRow">
-        <button id="toggleLayerVisible" title="Görünürlük">👁</button>
-        <button id="toggleLayerLock" title="Kilitle / Kilidi Aç">🔒</button>
-        <button id="bringLayerFront" title="En Öne Getir">↑↑</button>
-        <button id="sendLayerBack" title="En Arkaya Gönder">↓↓</button>
       </div>
     </section>
 
@@ -2876,7 +2890,7 @@ async function runAssistant() {
 }
 
 
-const CURRENT_VERSION = "0.11.8";
+const CURRENT_VERSION = "0.11.9";
 
 const UPDATE_FILES = ["app.bundle.js"];
 
@@ -3077,22 +3091,9 @@ document.querySelectorAll("[data-align-point]").forEach(btn => {
   btn.addEventListener("click", () => guarded(() => alignLayerToPoint(btn.dataset.alignPoint)));
 });
 
-document.getElementById("centerH").addEventListener("click", () => guarded(() => alignSelected("h")));
-document.getElementById("centerV").addEventListener("click", () => guarded(() => alignSelected("v")));
-document.getElementById("centerLayer").addEventListener("click", () => guarded(() => alignSelected("both")));
 document.getElementById("fitLayer").addEventListener("click", () => guarded(() => scaleAndCenter("fit")));
 document.getElementById("fillLayer").addEventListener("click", () => guarded(() => scaleAndCenter("fill")));
-document.getElementById("distributeH").addEventListener("click", () => guarded(() => distributeSelectedLayers("h")));
-document.getElementById("distributeV").addEventListener("click", () => guarded(() => distributeSelectedLayers("v")));
 
-document.getElementById("smartObject").addEventListener("click", () => guarded(convertToSmartObject));
-document.getElementById("groupLayers").addEventListener("click", () => guarded(groupSelectedLayers));
-document.getElementById("renameLayer").addEventListener("click", () => guarded(renameSelectedLayer));
-document.getElementById("duplicateLayer").addEventListener("click", () => guarded(duplicateSelectedLayer));
-document.getElementById("toggleLayerVisible").addEventListener("click", () => guarded(toggleSelectedLayerVisibility));
-document.getElementById("toggleLayerLock").addEventListener("click", () => guarded(toggleSelectedLayerLock));
-document.getElementById("bringLayerFront").addEventListener("click", () => guarded(() => moveSelectedLayerToEdge("front")));
-document.getElementById("sendLayerBack").addEventListener("click", () => guarded(() => moveSelectedLayerToEdge("back")));
 const placeAssetTopBtn = document.getElementById("placeAssetTop");
 if (placeAssetTopBtn) placeAssetTopBtn.addEventListener("click", () => guarded(placeAsset));
 const placeAssetBtn = document.getElementById("placeAsset");
@@ -3115,10 +3116,7 @@ brandSelect.addEventListener("change", () => guarded(async () => {
 function runUiSelfCheck() {
   const requiredIds = [
     "updatePlugin", "placeAssetTop", "safeZoneToggle",
-    "centerH", "centerV", "centerLayer", "fitLayer", "fillLayer",
-    "distributeH", "distributeV",
-    "smartObject", "groupLayers", "renameLayer", "duplicateLayer",
-    "toggleLayerVisible", "toggleLayerLock", "bringLayerFront", "sendLayerBack",
+    "fitLayer", "fillLayer",
     "assistantRun", "addBrand", "registerAsset", "learnLayout"
   ];
 

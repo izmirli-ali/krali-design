@@ -2,7 +2,16 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
-## v0.6.5
+### v0.7.0 — Single Bundle Updater
+- UI, tema ve çalışma mantığı `app.bundle.js` içinde birleştirildi.
+- `index.html` artık yalnızca sabit bootstrap dosyasıdır.
+- Panel içi updater bundan sonra yalnızca `app.bundle.js` dosyasını günceller.
+- Load & Watch ilk dosya değişiminde reload yapsa bile tek dosya yazıldığı için yarım güncelleme sorunu ortadan kalkar.
+- Siyah + #FF4141 tema v0.7.0 bundle içine dahil edilmiştir.
+- Bu mimariye geçiş için v0.7.0 bir kez manuel alınmalıdır; sonraki sürümler panelden tek tık güncellenir.
+
+
+## v0.7.0
 
 ### Yeni tema
 - Gri ağırlıklı görünüm siyah tabanlı hale getirildi.

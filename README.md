@@ -2,6 +2,12 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
+### v0.11.5 — Taller docked panel
+- Photoshop panelinin minimum yüksekliği 650 px'e çıkarıldı.
+- Varsayılan dock yüksekliği 1000 px'e çıkarıldı.
+- Panel daha uzun açılır; daha fazla araç scroll yapmadan görünür.
+
+
 ### v0.11.4 — Functional wiring fix
 - Ölçek presetlerinde eksik olan click event bağlantısı eklendi; butonlar artık gerçekten `applyScalePreset` fonksiyonunu çağırıyor.
 - Canvas değişimi Adobe UXP DOM `Document.resizeCanvas()` metoduna geçirildi.

@@ -1,4 +1,4 @@
-// KRALI DESIGN v0.11.2 — single-file runtime bundle
+// KRALI 100 YILLIK DENEYİM v0.11.3 — single-file runtime bundle
 (function () {
   const style = document.createElement("style");
   style.textContent = `* { box-sizing: border-box; }
@@ -1553,13 +1553,13 @@ input[type="checkbox"] {
   document.body.innerHTML = `<div class="app">
     <header class="topbar">
       <div class="brandBlock">
-        <div class="title">KRALI DESIGN</div>
+        <div class="title">KRALI 100 YILLIK DENEYİM</div>
         <div class="sub">Photoshop Workflow Accelerator</div>
       </div>
       <div class="topActions">
         <button id="placeAssetTop" class="assetTopBtn" title="Dosyadan Asset Ekle">📁</button>
         <button id="updatePlugin" class="updateBtn">↻ Güncelle</button>
-        <div class="version">v0.11.2</div>
+        <div class="version">v0.11.3</div>
       </div>
     </header>
 
@@ -1719,7 +1719,7 @@ input[type="checkbox"] {
       <div class="tiny">Marka/asset çağırma + safe zone + fit/fill/ortalama komutlarını lokal olarak çalıştırır.</div>
     </section>
 
-    <div id="status" class="status">KRALI DESIGN hazırlanıyor...</div>
+    <div id="status" class="status">KRALI 100 YILLIK DENEYİM hazırlanıyor...</div>
   </div>`;
 })();
 
@@ -2861,7 +2861,7 @@ async function runAssistant() {
 }
 
 
-const CURRENT_VERSION = "0.11.2";
+const CURRENT_VERSION = "0.11.3";
 
 const UPDATE_FILES = ["app.bundle.js"];
 
@@ -3103,6 +3103,6 @@ brandSelect.addEventListener("change", () => guarded(async () => {
 
 const runtimeVersionEl = document.querySelector(".version");
 if (runtimeVersionEl) runtimeVersionEl.textContent = "v" + CURRENT_VERSION;
-setStatus("KRALI DESIGN v" + CURRENT_VERSION + " hazır");
+setStatus("KRALI 100 YILLIK DENEYİM v" + CURRENT_VERSION + " hazır");
 initMemory();
 

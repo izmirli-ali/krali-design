@@ -2,6 +2,14 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
+### v0.11.4 — Functional wiring fix
+- Ölçek presetlerinde eksik olan click event bağlantısı eklendi; butonlar artık gerçekten `applyScalePreset` fonksiyonunu çağırıyor.
+- Canvas değişimi Adobe UXP DOM `Document.resizeCanvas()` metoduna geçirildi.
+- Safe Zone toggle ilk kullanımda preset seçilmemişse aktif belgenin oranından uygun preset'i otomatik belirler.
+- Kaldırılmış Hızlı Format kontrollerinden kalan eski listener temizlendi.
+- Panel açılışında ana kontrolleri, 4 ölçek presetini ve 6 Safe Zone presetini doğrulayan UI self-check eklendi.
+
+
 ### v0.11.3 — Rename
 - Paket adı, panel başlığı ve Photoshop panel etiketi **KRALI 100 YILLIK DENEYİM** olarak değiştirildi.
 - Plugin ID korunarak mevcut eklentiyle aynı kurulum üzerinde devam edildi.

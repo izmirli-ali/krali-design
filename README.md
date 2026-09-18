@@ -2,6 +2,14 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
+### v0.11.2 — Canvas presets + Safe Zone toggle + distribute
+- Ölçek presetleri artık yalnızca mevcut çalışma yüzeyinin canvas ölçüsünü değiştirir; içerik boyutuna dokunmaz.
+- Canvas değişimi doğrudan Photoshop batchPlay `canvasSize` ile uygulanır ve sonuç doğrulanır.
+- Safe Zone switch gizli checkbox yerine gerçek tıklanabilir toggle butona dönüştürüldü.
+- Switch kapalıyken guide'lar temizlenir, tekrar açıldığında son preset yeniden uygulanır.
+- Yerleşim bölümüne 3+ seçili layer için yatay ve dikey eşit dağıtma kontrolleri eklendi.
+
+
 ### v0.11.1 — Scale + Safe Zone switch fix
 - Ölçek presetleri artık yalnızca canvas kesmek yerine belgeyi oranı bozmadan hedef alanı dolduracak şekilde ölçekler ve sonra hedef canvas'a ortadan kırpar.
 - İşlem sonunda hedef ölçü doğrulanır; başarısızsa hata gösterilir.

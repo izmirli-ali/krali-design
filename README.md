@@ -2,42 +2,45 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
-## v0.2.1
+## v0.3.0
 
-- Reels / Story / 4:5 / 16:9 / 1:1 / Generic 9:16 Safe Zone presetleri
+### Quick tools
+- Reels / Story / 4:5 / 16:9 / 1:1 / Generic 9:16 Safe Zone
 - Safe Zone göster / gizle / temizle
 - Center / Fit / Fill
 - %80 / %90 / %100 genişlik
 - Smart Object
 - Layer grouping
 - Layer rename
-- Asset place
-- Local Assistant
+- Dosyadan asset ekleme
 
-## İlk kurulum
+### Marka Hafızası
+- Marka profili oluşturma
+- Logo / ürün / background / dekor / diğer asset kaydı
+- UXP persistent file token ile dosyayı tekrar seçmeden çağırma
+- Kayıtlı asseti tek tıkla Photoshop'a Smart Object olarak yerleştirme
+- Asseti hafızadan silme
+- Local Assistant içinden marka ve asset çağırma
 
-Repo'yu Mac'e bir kez kur:
+Örnek:
 
-```bash
-git clone https://github.com/izmirli-ali/krali-design.git ~/Documents/KRALI-DESIGN
-chmod +x ~/Documents/KRALI-DESIGN/scripts/*.command
-```
+`Vox beyaz logosunu ekle ve reels safe zone aç`
 
-Ardından UXP Developer Tool:
-
-1. Add Plugin
-2. `~/Documents/KRALI-DESIGN/manifest.json`
-3. Load & Watch
+Kayıtlı marka ve asset adı eşleşirse panel materyali yerleştirir ve Safe Zone'u uygular.
 
 ## Güncelleme
+
+Finder:
+
+`~/Documents/KRALI-DESIGN/scripts/update.command`
+
+veya Terminal:
 
 ```bash
 cd ~/Documents/KRALI-DESIGN
 git pull
 ```
 
-veya Finder'dan:
+UXP Developer Tool'da **Load & Watch** açık bırakılabilir.
 
-`scripts/update.command`
-
-Manifest değişmedikçe tekrar Add Plugin gerekmez.
+Bu sürümde manifest değişmediği için yeniden Add Plugin gerekmez.

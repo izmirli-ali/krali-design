@@ -1,4 +1,4 @@
-// KRALI DESIGN v0.10.1 — single-file runtime bundle
+// KRALI DESIGN v0.10.2 — single-file runtime bundle
 (function () {
   const style = document.createElement("style");
   style.textContent = `* { box-sizing: border-box; }
@@ -1240,6 +1240,47 @@ input[type="checkbox"] {
   document.head.appendChild(v0101Style);
 
 
+  const v0102Style = document.createElement("style");
+  v0102Style.textContent = `
+    /* v0.10.2 format icon cleanup */
+    .formatIcons{
+      display:grid !important;
+      grid-template-columns:repeat(4,1fr) !important;
+      gap:5px !important;
+      margin:5px 0 0 !important;
+    }
+    .formatIconBtn{
+      min-height:54px !important;
+      padding:5px 2px !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      background:#0c0c0c !important;
+      border:1px solid #272727 !important;
+      border-radius:7px !important;
+    }
+    .formatIconBtn:hover{
+      background:#1b0d0d !important;
+      border-color:#ff4141 !important;
+    }
+    .ratioIcon{
+      display:block !important;
+      border:1.5px solid #ff4141 !important;
+      border-radius:3px !important;
+      opacity:1 !important;
+      background:transparent !important;
+      box-shadow:inset 0 0 0 1px rgba(255,65,65,.04);
+    }
+    .ratio916{width:14px !important;height:30px !important}
+    .ratio45{width:22px !important;height:28px !important}
+    .ratio11{width:26px !important;height:26px !important}
+    .ratio169{width:36px !important;height:20px !important}
+    .ratioLabel{display:none !important}
+  `;
+  document.head.appendChild(v0102Style);
+
+
+
 
   document.body.innerHTML = `<div class="app">
     <header class="topbar">
@@ -1249,17 +1290,9 @@ input[type="checkbox"] {
       </div>
       <div class="topActions">
         <button id="updatePlugin" class="updateBtn">↻ Güncelle</button>
-        <div class="version">v0.10.1</div>
+        <div class="version">v0.10.2</div>
       </div>
     </header>
-
-    <section class="docCard">
-      <div class="sectionHead">
-        <h2>AKTİF BELGE</h2>
-        <button id="refreshDoc" class="miniBtn refreshIconBtn" title="Belge bilgisini yenile">↻</button>
-      </div>
-      <div id="docInfo" class="docInfo">Belge bilgisi bekleniyor...</div>
-    </section>
 
     <section>
       <h2>HIZLI FORMAT</h2>
@@ -1286,24 +1319,20 @@ input[type="checkbox"] {
       </div>
 
       <div class="formatIcons">
-        <button class="formatIconBtn" data-format="vertical" title="Dikey 9:16 • 1080×1920">
+        <button class="formatIconBtn" data-format="vertical" title="Dikey • 1080×1920">
           <span class="ratioIcon ratio916"></span>
-          <span class="ratioLabel">9:16</span>
         </button>
 
-        <button class="formatIconBtn" data-format="post45" title="Post 4:5 • 1080×1350">
+        <button class="formatIconBtn" data-format="post45" title="Post • 1080×1350">
           <span class="ratioIcon ratio45"></span>
-          <span class="ratioLabel">4:5</span>
         </button>
 
-        <button class="formatIconBtn" data-format="square" title="Kare 1:1 • 1080×1080">
+        <button class="formatIconBtn" data-format="square" title="Kare • 1080×1080">
           <span class="ratioIcon ratio11"></span>
-          <span class="ratioLabel">1:1</span>
         </button>
 
-        <button class="formatIconBtn" data-format="horizontal" title="Yatay 16:9 • 1920×1080">
+        <button class="formatIconBtn" data-format="horizontal" title="Yatay • 1920×1080">
           <span class="ratioIcon ratio169"></span>
-          <span class="ratioLabel">16:9</span>
         </button>
       </div>
     </section>
@@ -1536,6 +1565,7 @@ async function modal(name, fn) {
 }
 
 async function refreshDocInfo() {
+  if (!docInfo) return;
   if (!app.documents.length) {
     docInfo.innerHTML = '<div class="docName">Açık belge yok</div><div class="docMeta">Photoshop belgesi bekleniyor</div>';
     return;
@@ -2431,7 +2461,7 @@ async function runAssistant() {
 }
 
 
-const CURRENT_VERSION = "0.10.1";
+const CURRENT_VERSION = "0.10.2";
 
 const UPDATE_FILES = ["app.bundle.js"];
 
@@ -2616,7 +2646,8 @@ async function guarded(fn) {
 }
 
 document.getElementById("updatePlugin").addEventListener("click", () => guarded(updatePluginFromGitHub));
-document.getElementById("refreshDoc").addEventListener("click", () => guarded(refreshDocInfo));
+const refreshDocBtn = document.getElementById("refreshDoc");
+if (refreshDocBtn) refreshDocBtn.addEventListener("click", () => guarded(refreshDocInfo));
 
 document.querySelectorAll("[data-format]").forEach(btn => {
   btn.addEventListener("click", () => guarded(() => quickFormat(btn.dataset.format)));

@@ -13,7 +13,7 @@
       </div>
       <div class="topActions">
         <button id="updatePlugin" class="updateBtn">Sürümü Güncelle</button>
-        <div class="version">v0.4.0</div>
+        <div class="version">v0.5.0</div>
       </div>
     </header>
 
@@ -23,6 +23,38 @@
         <button id="refreshDoc" class="miniBtn">Yenile</button>
       </div>
       <div id="docInfo" class="docInfo">Belge bilgisi bekleniyor...</div>
+    </section>
+
+    <section>
+      <h2>HIZLI FORMAT</h2>
+
+      <div class="formatMode">
+        <select id="resizeMode" aria-label="Ölçekleme modu">
+          <option value="smart">Akıllı Uyarla</option>
+          <option value="canvas">Sadece Canvas</option>
+        </select>
+
+        <label class="checkLine">
+          <input id="duplicateBeforeResize" type="checkbox" checked />
+          <span>Önce belgeyi kopyala</span>
+        </label>
+
+        <label class="checkLine">
+          <input id="safeAfterResize" type="checkbox" checked />
+          <span>Uygun Safe Zone ekle</span>
+        </label>
+      </div>
+
+      <div class="buttonRow two">
+        <button class="accent" data-format="vertical">Dikey 9:16<br><small>1080×1920</small></button>
+        <button class="accent" data-format="post45">Post 4:5<br><small>1080×1350</small></button>
+        <button class="accent" data-format="square">Kare 1:1<br><small>1080×1080</small></button>
+        <button class="accent" data-format="horizontal">Yatay 16:9<br><small>1920×1080</small></button>
+      </div>
+
+      <div class="tiny">
+        Akıllı Uyarla: layer konumlarını ve boyutlarını oranlı olarak yeni formata taşır. İlk sürüm üst seviye layer'larda çalışır.
+      </div>
     </section>
 
     <section>

@@ -2,6 +2,12 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
+### v0.11.6 — Full-height responsive panel
+- Panel kökü Photoshop dock alanının mevcut yüksekliğini `height: 100%` ile dolduracak şekilde düzenlendi.
+- `.app` flex container yapısına geçirildi ve kullanılabilir dikey alanı tamamen kullanır hale getirildi.
+- Scroll yalnızca içerik dock yüksekliğini gerçekten aşarsa devreye girer.
+
+
 ### v0.11.5 — Taller docked panel
 - Photoshop panelinin minimum yüksekliği 650 px'e çıkarıldı.
 - Varsayılan dock yüksekliği 1000 px'e çıkarıldı.

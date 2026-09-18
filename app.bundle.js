@@ -1,4 +1,4 @@
-// KRALI DESIGN v0.11.1 — single-file runtime bundle
+// KRALI DESIGN v0.11.2 — single-file runtime bundle
 (function () {
   const style = document.createElement("style");
   style.textContent = `* { box-sizing: border-box; }
@@ -1491,6 +1491,59 @@ input[type="checkbox"] {
   document.head.appendChild(v0111Style);
 
 
+  const v0112Style = document.createElement("style");
+  v0112Style.textContent = `
+    /* v0.11.2 canvas + safe toggle */
+    .safeToggleBtn{
+      position:relative !important;
+      display:block !important;
+      width:36px !important;
+      min-width:36px !important;
+      height:20px !important;
+      min-height:20px !important;
+      padding:0 !important;
+      border:0 !important;
+      background:transparent !important;
+    }
+    .safeToggleBtn .safeSwitchTrack{
+      display:block !important;
+      position:relative !important;
+      width:36px !important;
+      height:20px !important;
+      border-radius:999px !important;
+      background:#171717 !important;
+      border:1px solid #363636 !important;
+    }
+    .safeToggleBtn .safeSwitchThumb{
+      display:block !important;
+      position:absolute !important;
+      left:3px !important;
+      top:3px !important;
+      width:12px !important;
+      height:12px !important;
+      border-radius:50% !important;
+      background:#757575 !important;
+    }
+    .safeToggleBtn.on .safeSwitchTrack{
+      background:#321212 !important;
+      border-color:#ff4141 !important;
+    }
+    .safeToggleBtn.on .safeSwitchThumb{
+      left:19px !important;
+      background:#ff4141 !important;
+    }
+    .distributeRow{
+      margin-top:4px !important;
+    }
+    .distributeRow button{
+      background:#0e0e0e !important;
+      border-color:#292929 !important;
+    }
+  `;
+  document.head.appendChild(v0112Style);
+
+
+
 
 
 
@@ -1506,7 +1559,7 @@ input[type="checkbox"] {
       <div class="topActions">
         <button id="placeAssetTop" class="assetTopBtn" title="Dosyadan Asset Ekle">📁</button>
         <button id="updatePlugin" class="updateBtn">↻ Güncelle</button>
-        <div class="version">v0.11.1</div>
+        <div class="version">v0.11.2</div>
       </div>
     </header>
 
@@ -1547,10 +1600,9 @@ input[type="checkbox"] {
           <span>Safe Zone</span>
           <small id="safeSwitchState">Gizli</small>
         </div>
-        <label class="safeSwitch" title="Safe Zone göster / gizle">
-          <input id="safeZoneSwitch" type="checkbox" />
+        <button id="safeZoneToggle" class="safeToggleBtn" type="button" data-on="false" title="Safe Zone göster / gizle">
           <span class="safeSwitchTrack"><span class="safeSwitchThumb"></span></span>
-        </label>
+        </button>
       </div>
     </section>
 
@@ -1583,6 +1635,10 @@ input[type="checkbox"] {
       <div class="buttonRow two">
         <button id="fitLayer">Fit</button>
         <button id="fillLayer">Fill</button>
+      </div>
+      <div class="buttonRow two distributeRow">
+        <button id="distributeH">Dağıt ↔</button>
+        <button id="distributeV">Dağıt ↕</button>
       </div>
     </section>
 
@@ -2364,10 +2420,20 @@ async function applyScalePreset(key) {
   const preset = FORMAT_PRESETS[key];
   if (!preset) throw new Error("Ölçek preset bulunamadı.");
 
-  setStatus(preset.name + " hazırlanıyor...");
+  setStatus(preset.name + " canvas uygulanıyor...");
 
-  await modal("Ölçek " + preset.name, async () => {
-    await resizeDocumentCoverTo(preset.width, preset.height);
+  await modal("Canvas " + preset.name, async () => {
+    await batchPlay(
+      [{
+        _obj: "canvasSize",
+        width: { _unit: "pixelsUnit", _value: preset.width },
+        height: { _unit: "pixelsUnit", _value: preset.height },
+        horizontal: { _enum: "horizontalLocation", _value: "center" },
+        vertical: { _enum: "verticalLocation", _value: "center" },
+        _options: { dialogOptions: "dontDisplay" }
+      }],
+      {}
+    );
   });
 
   const doc = getDoc();
@@ -2375,18 +2441,19 @@ async function applyScalePreset(key) {
   const finalH = Math.round(px(doc.height));
 
   if (finalW !== preset.width || finalH !== preset.height) {
-    throw new Error("Ölçek doğrulanamadı: " + finalW + "×" + finalH);
+    throw new Error("Canvas ölçüsü uygulanamadı: " + finalW + "×" + finalH);
   }
 
   document.querySelectorAll("[data-scale-preset]").forEach(btn => {
     btn.classList.toggle("active", btn.dataset.scalePreset === key);
   });
 
-  if (lastSafePreset && document.getElementById("safeZoneSwitch")?.checked) {
+  const safeToggle = document.getElementById("safeZoneToggle");
+  if (lastSafePreset && safeToggle && safeToggle.dataset.on === "true") {
     await applySafePreset(lastSafePreset);
   }
 
-  setStatus("✓ " + preset.name + " • " + finalW + "×" + finalH);
+  setStatus("✓ Canvas " + finalW + "×" + finalH);
 }
 
 const SAFE_PRESETS = {
@@ -2397,6 +2464,17 @@ const SAFE_PRESETS = {
   square: { name: "Kare 1:1", left: 0.07, right: 0.07, top: 0.07, bottom: 0.07 },
   generic916: { name: "Genel 9:16", left: 0.075, right: 0.075, top: 0.10, bottom: 0.10 }
 };
+
+function setSafeToggleUi(on) {
+  const toggle = document.getElementById("safeZoneToggle");
+  if (toggle) {
+    toggle.dataset.on = on ? "true" : "false";
+    toggle.classList.toggle("on", !!on);
+  }
+
+  const state = document.getElementById("safeSwitchState");
+  if (state) state.textContent = on ? "Gösteriliyor" : "Gizli";
+}
 
 async function applySafePreset(key) {
   const preset = SAFE_PRESETS[key];
@@ -2430,10 +2508,7 @@ async function applySafePreset(key) {
     btn.classList.toggle("active", btn.dataset.safe === key);
   });
 
-  const safeSwitch = document.getElementById("safeZoneSwitch");
-  if (safeSwitch) safeSwitch.checked = true;
-  const safeSwitchState = document.getElementById("safeSwitchState");
-  if (safeSwitchState) safeSwitchState.textContent = "Gösteriliyor";
+  setSafeToggleUi(true);
 
   setStatus("✓ " + preset.name + " Safe Zone eklendi");
 }
@@ -2441,28 +2516,24 @@ async function applySafePreset(key) {
 async function hideSafeZoneGuides() {
   await modal("Safe Zone Gizle", clearGuidesInternal);
   guidesVisible = false;
-
-  const safeSwitch = document.getElementById("safeZoneSwitch");
-  if (safeSwitch) safeSwitch.checked = false;
-  const safeSwitchState = document.getElementById("safeSwitchState");
-  if (safeSwitchState) safeSwitchState.textContent = "Gizli";
-
+  setSafeToggleUi(false);
   setStatus("✓ Safe Zone gizlendi");
 }
 
-async function setSafeZoneVisibility(visible) {
-  if (visible) {
-    if (!lastSafePreset) {
-      const safeSwitch = document.getElementById("safeZoneSwitch");
-      if (safeSwitch) safeSwitch.checked = false;
-      throw new Error("Önce bir Safe Zone preset seç.");
-    }
+async function toggleSafeZone() {
+  const toggle = document.getElementById("safeZoneToggle");
+  const isOn = toggle && toggle.dataset.on === "true";
 
-    await applySafePreset(lastSafePreset);
+  if (isOn) {
+    await hideSafeZoneGuides();
     return;
   }
 
-  await hideSafeZoneGuides();
+  if (!lastSafePreset) {
+    throw new Error("Önce bir Safe Zone preset seç.");
+  }
+
+  await applySafePreset(lastSafePreset);
 }
 
 async function alignSelected(axis) {
@@ -2527,6 +2598,43 @@ async function alignLayerToPoint(point) {
   });
 
   setStatus("✓ Layer hizalandı" + (document.getElementById("safeAlignMargin")?.checked ? " • %5 pay" : ""));
+}
+
+async function distributeSelectedLayers(axis) {
+  const layers = getSelectedLayers();
+  if (layers.length < 3) throw new Error("Dağıtmak için en az 3 layer seç.");
+
+  await modal(axis === "h" ? "Yatay Dağıt" : "Dikey Dağıt", async () => {
+    const items = layers.map(layer => {
+      const b = layerBounds(layer);
+      return {
+        layer,
+        bounds: b,
+        centerX: (b.left + b.right) / 2,
+        centerY: (b.top + b.bottom) / 2
+      };
+    });
+
+    items.sort((a, b) => axis === "h" ? a.centerX - b.centerX : a.centerY - b.centerY);
+
+    const first = items[0];
+    const last = items[items.length - 1];
+    const start = axis === "h" ? first.centerX : first.centerY;
+    const end = axis === "h" ? last.centerX : last.centerY;
+    const step = (end - start) / (items.length - 1);
+
+    for (let i = 1; i < items.length - 1; i++) {
+      const item = items[i];
+      const current = axis === "h" ? item.centerX : item.centerY;
+      const target = start + step * i;
+      await item.layer.translate(
+        axis === "h" ? target - current : 0,
+        axis === "v" ? target - current : 0
+      );
+    }
+  });
+
+  setStatus(axis === "h" ? "✓ Layer'lar yatay dağıtıldı" : "✓ Layer'lar dikey dağıtıldı");
 }
 
 async function toggleSelectedLayerVisibility() {
@@ -2753,7 +2861,7 @@ async function runAssistant() {
 }
 
 
-const CURRENT_VERSION = "0.11.1";
+const CURRENT_VERSION = "0.11.2";
 
 const UPDATE_FILES = ["app.bundle.js"];
 
@@ -2949,11 +3057,9 @@ document.querySelectorAll("[data-safe]").forEach(btn => {
   btn.addEventListener("click", () => guarded(() => applySafePreset(btn.dataset.safe)));
 });
 
-const safeZoneSwitch = document.getElementById("safeZoneSwitch");
-if (safeZoneSwitch) {
-  safeZoneSwitch.addEventListener("change", () => {
-    guarded(() => setSafeZoneVisibility(safeZoneSwitch.checked));
-  });
+const safeZoneToggle = document.getElementById("safeZoneToggle");
+if (safeZoneToggle) {
+  safeZoneToggle.addEventListener("click", () => guarded(toggleSafeZone));
 }
 
 document.querySelectorAll("[data-align-point]").forEach(btn => {
@@ -2965,6 +3071,8 @@ document.getElementById("centerV").addEventListener("click", () => guarded(() =>
 document.getElementById("centerLayer").addEventListener("click", () => guarded(() => alignSelected("both")));
 document.getElementById("fitLayer").addEventListener("click", () => guarded(() => scaleAndCenter("fit")));
 document.getElementById("fillLayer").addEventListener("click", () => guarded(() => scaleAndCenter("fill")));
+document.getElementById("distributeH").addEventListener("click", () => guarded(() => distributeSelectedLayers("h")));
+document.getElementById("distributeV").addEventListener("click", () => guarded(() => distributeSelectedLayers("v")));
 
 document.getElementById("smartObject").addEventListener("click", () => guarded(convertToSmartObject));
 document.getElementById("groupLayers").addEventListener("click", () => guarded(groupSelectedLayers));

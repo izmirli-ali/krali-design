@@ -1,4 +1,4 @@
-// KRALI DESIGN v0.11.0 — single-file runtime bundle
+// KRALI DESIGN v0.11.1 — single-file runtime bundle
 (function () {
   const style = document.createElement("style");
   style.textContent = `* { box-sizing: border-box; }
@@ -1419,6 +1419,79 @@ input[type="checkbox"] {
   document.head.appendChild(v0110Style);
 
 
+  const v0111Style = document.createElement("style");
+  v0111Style.textContent = `
+    /* v0.11.1 scale + switch fix */
+    .safeSwitchRow{
+      display:flex !important;
+      align-items:center !important;
+      justify-content:space-between !important;
+      gap:8px !important;
+      margin-top:6px !important;
+      padding:7px 8px !important;
+      border:1px solid #292929 !important;
+      border-radius:8px !important;
+      background:#0b0b0b !important;
+    }
+    .safeSwitchText{
+      display:flex !important;
+      flex-direction:column !important;
+      gap:2px !important;
+    }
+    .safeSwitchText>span{
+      color:#e8e8e8 !important;
+      font-size:8px !important;
+      font-weight:650 !important;
+    }
+    .safeSwitchText small{
+      color:#777 !important;
+      font-size:7px !important;
+    }
+    .safeSwitch{
+      position:relative !important;
+      display:block !important;
+      width:34px !important;
+      height:18px !important;
+      flex:0 0 34px !important;
+      cursor:pointer !important;
+    }
+    .safeSwitch input{
+      position:absolute !important;
+      opacity:0 !important;
+      pointer-events:none !important;
+    }
+    .safeSwitchTrack{
+      display:block !important;
+      position:relative !important;
+      width:34px !important;
+      height:18px !important;
+      border-radius:999px !important;
+      background:#1a1a1a !important;
+      border:1px solid #343434 !important;
+    }
+    .safeSwitchThumb{
+      display:block !important;
+      position:absolute !important;
+      left:2px !important;
+      top:2px !important;
+      width:12px !important;
+      height:12px !important;
+      border-radius:50% !important;
+      background:#777 !important;
+    }
+    .safeSwitch input:checked + .safeSwitchTrack{
+      background:#321212 !important;
+      border-color:#ff4141 !important;
+    }
+    .safeSwitch input:checked + .safeSwitchTrack .safeSwitchThumb{
+      left:18px !important;
+      background:#ff4141 !important;
+    }
+  `;
+  document.head.appendChild(v0111Style);
+
+
+
 
 
 
@@ -1433,7 +1506,7 @@ input[type="checkbox"] {
       <div class="topActions">
         <button id="placeAssetTop" class="assetTopBtn" title="Dosyadan Asset Ekle">📁</button>
         <button id="updatePlugin" class="updateBtn">↻ Güncelle</button>
-        <div class="version">v0.11.0</div>
+        <div class="version">v0.11.1</div>
       </div>
     </header>
 
@@ -1469,9 +1542,15 @@ input[type="checkbox"] {
         <button class="primary safePresetBtn" data-safe="square"><span class="safeName">Kare</span><span class="safeRatio">1:1</span></button>
         <button class="primary safePresetBtn" data-safe="generic916"><span class="safeName">Genel</span><span class="safeRatio">9:16</span></button>
       </div>
-      <div class="buttonRow two">
-        <button id="toggleGuides" class="secondary">Göster / Gizle</button>
-        <button id="clearGuides" class="danger">Temizle</button>
+      <div class="safeSwitchRow">
+        <div class="safeSwitchText">
+          <span>Safe Zone</span>
+          <small id="safeSwitchState">Gizli</small>
+        </div>
+        <label class="safeSwitch" title="Safe Zone göster / gizle">
+          <input id="safeZoneSwitch" type="checkbox" />
+          <span class="safeSwitchTrack"><span class="safeSwitchThumb"></span></span>
+        </label>
       </div>
     </section>
 
@@ -2151,6 +2230,45 @@ async function resizeCanvasTo(width, height) {
   );
 }
 
+async function resizeDocumentCoverTo(targetWidth, targetHeight) {
+  const doc = getDoc();
+  const currentWidth = px(doc.width);
+  const currentHeight = px(doc.height);
+
+  if (currentWidth <= 0 || currentHeight <= 0) {
+    throw new Error("Belge ölçüsü okunamadı.");
+  }
+
+  const scale = Math.max(targetWidth / currentWidth, targetHeight / currentHeight);
+  const scaledWidth = Math.max(1, Math.round(currentWidth * scale));
+  const scaledHeight = Math.max(1, Math.round(currentHeight * scale));
+
+  await batchPlay(
+    [{
+      _obj: "imageSize",
+      width: { _unit: "pixelsUnit", _value: scaledWidth },
+      height: { _unit: "pixelsUnit", _value: scaledHeight },
+      constrainProportions: true,
+      scaleStyles: true,
+      interpolation: { _enum: "interpolationType", _value: "bicubicAutomatic" },
+      _options: { dialogOptions: "dontDisplay" }
+    }],
+    {}
+  );
+
+  await batchPlay(
+    [{
+      _obj: "canvasSize",
+      width: { _unit: "pixelsUnit", _value: targetWidth },
+      height: { _unit: "pixelsUnit", _value: targetHeight },
+      horizontal: { _enum: "horizontalLocation", _value: "center" },
+      vertical: { _enum: "verticalLocation", _value: "center" },
+      _options: { dialogOptions: "dontDisplay" }
+    }],
+    {}
+  );
+}
+
 async function applySmartGeometry(savedGeometry, oldWidth, oldHeight, newWidth, newHeight) {
   const doc = getDoc();
   const layers = flattenTopLayers(doc);
@@ -2246,15 +2364,29 @@ async function applyScalePreset(key) {
   const preset = FORMAT_PRESETS[key];
   if (!preset) throw new Error("Ölçek preset bulunamadı.");
 
+  setStatus(preset.name + " hazırlanıyor...");
+
   await modal("Ölçek " + preset.name, async () => {
-    await resizeCanvasTo(preset.width, preset.height);
+    await resizeDocumentCoverTo(preset.width, preset.height);
   });
+
+  const doc = getDoc();
+  const finalW = Math.round(px(doc.width));
+  const finalH = Math.round(px(doc.height));
+
+  if (finalW !== preset.width || finalH !== preset.height) {
+    throw new Error("Ölçek doğrulanamadı: " + finalW + "×" + finalH);
+  }
 
   document.querySelectorAll("[data-scale-preset]").forEach(btn => {
     btn.classList.toggle("active", btn.dataset.scalePreset === key);
   });
 
-  setStatus("✓ " + preset.name + " • " + preset.width + "×" + preset.height);
+  if (lastSafePreset && document.getElementById("safeZoneSwitch")?.checked) {
+    await applySafePreset(lastSafePreset);
+  }
+
+  setStatus("✓ " + preset.name + " • " + finalW + "×" + finalH);
 }
 
 const SAFE_PRESETS = {
@@ -2298,25 +2430,39 @@ async function applySafePreset(key) {
     btn.classList.toggle("active", btn.dataset.safe === key);
   });
 
+  const safeSwitch = document.getElementById("safeZoneSwitch");
+  if (safeSwitch) safeSwitch.checked = true;
+  const safeSwitchState = document.getElementById("safeSwitchState");
+  if (safeSwitchState) safeSwitchState.textContent = "Gösteriliyor";
+
   setStatus("✓ " + preset.name + " Safe Zone eklendi");
 }
 
-async function clearGuides() {
-  await modal("Guide Temizle", clearGuidesInternal);
+async function hideSafeZoneGuides() {
+  await modal("Safe Zone Gizle", clearGuidesInternal);
   guidesVisible = false;
-  document.querySelectorAll("[data-safe]").forEach(btn => btn.classList.remove("active"));
-  setStatus("✓ Guide'lar temizlendi");
+
+  const safeSwitch = document.getElementById("safeZoneSwitch");
+  if (safeSwitch) safeSwitch.checked = false;
+  const safeSwitchState = document.getElementById("safeSwitchState");
+  if (safeSwitchState) safeSwitchState.textContent = "Gizli";
+
+  setStatus("✓ Safe Zone gizlendi");
 }
 
-async function toggleGuides() {
-  if (guidesVisible) {
-    await modal("Guide Gizle", clearGuidesInternal);
-    guidesVisible = false;
-    setStatus("✓ Safe Zone gizlendi");
-  } else {
-    if (!lastSafePreset) throw new Error("Önce bir Safe Zone seç.");
+async function setSafeZoneVisibility(visible) {
+  if (visible) {
+    if (!lastSafePreset) {
+      const safeSwitch = document.getElementById("safeZoneSwitch");
+      if (safeSwitch) safeSwitch.checked = false;
+      throw new Error("Önce bir Safe Zone preset seç.");
+    }
+
     await applySafePreset(lastSafePreset);
+    return;
   }
+
+  await hideSafeZoneGuides();
 }
 
 async function alignSelected(axis) {
@@ -2607,7 +2753,7 @@ async function runAssistant() {
 }
 
 
-const CURRENT_VERSION = "0.11.0";
+const CURRENT_VERSION = "0.11.1";
 
 const UPDATE_FILES = ["app.bundle.js"];
 
@@ -2803,8 +2949,12 @@ document.querySelectorAll("[data-safe]").forEach(btn => {
   btn.addEventListener("click", () => guarded(() => applySafePreset(btn.dataset.safe)));
 });
 
-document.getElementById("toggleGuides").addEventListener("click", () => guarded(toggleGuides));
-document.getElementById("clearGuides").addEventListener("click", () => guarded(clearGuides));
+const safeZoneSwitch = document.getElementById("safeZoneSwitch");
+if (safeZoneSwitch) {
+  safeZoneSwitch.addEventListener("change", () => {
+    guarded(() => setSafeZoneVisibility(safeZoneSwitch.checked));
+  });
+}
 
 document.querySelectorAll("[data-align-point]").forEach(btn => {
   btn.addEventListener("click", () => guarded(() => alignLayerToPoint(btn.dataset.alignPoint)));

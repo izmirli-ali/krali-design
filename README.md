@@ -2,6 +2,12 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
+### v0.11.8 — Görünüm v0.11.5'e geri alındı
+- v0.11.6 ve v0.11.7 responsive tam-yükseklik CSS değişiklikleri tamamen kaldırıldı.
+- Panel görünümü ve scroll davranışı v0.11.5'teki stabil düzene geri döndü.
+- v0.11.5'teki ölçek, Safe Zone, Yerleşim ve Layer fonksiyonları korunuyor.
+
+
 ### v0.11.7 — Responsive layout fix
 - v0.11.6'da kartları dikeyde sıkıştıran flex yerleşim kaldırıldı.
 - Panel dock yüksekliğinin tamamını kullanmaya devam eder.

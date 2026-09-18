@@ -105,7 +105,7 @@ button.accent { background: #2d5fa8; border-color: #356fc5; }
 .buttonRow.three button { flex: 1 1 28%; }
 
 textarea,
-input,
+input[type="text"],
 select {
   width: 100%;
   min-height: 35px;
@@ -123,7 +123,7 @@ textarea {
   margin: 0 0 7px 0;
 }
 
-input, select { padding: 0 8px; }
+input[type="text"], select { padding: 0 8px; }
 select { margin-bottom: 7px; }
 
 .inlineForm {
@@ -226,8 +226,6 @@ select { margin-bottom: 7px; }
 }
 
 .status {
-  position: sticky;
-  bottom: 0;
   padding: 9px 10px;
   border: 1px solid #3b3b3b;
   border-radius: 8px;
@@ -276,4 +274,113 @@ button small {
   color: #c2c2c2;
   font-size: 8px;
   font-weight: 500;
+}
+
+
+html, body {
+  height: 100%;
+  min-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+body {
+  -webkit-overflow-scrolling: touch;
+}
+
+.app {
+  padding-bottom: 24px;
+}
+
+section {
+  overflow: visible;
+}
+
+.pairRow {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+  width: 100%;
+}
+
+.pairRow .formatBtn {
+  flex: 1 1 0;
+  min-width: 0;
+  width: 50%;
+  min-height: 38px;
+  padding: 0 6px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.checkLine {
+  color: #c5c5c5;
+  opacity: 1;
+}
+
+.checkLine input[type="checkbox"] {
+  appearance: auto;
+  width: 16px;
+  height: 16px;
+  min-height: 16px;
+  margin: 0;
+  padding: 0;
+  flex: 0 0 16px;
+}
+
+.formatMode {
+  gap: 4px;
+  margin-bottom: 7px;
+}
+
+.formatMode select {
+  min-height: 32px;
+}
+
+.docCard,
+section {
+  padding: 10px;
+}
+
+.topbar {
+  margin-bottom: 8px;
+}
+
+.title {
+  font-size: 15px;
+}
+
+.sub {
+  font-size: 9px;
+}
+
+.updateBtn {
+  min-height: 26px;
+  font-size: 9px;
+}
+
+.buttonRow {
+  gap: 5px;
+  margin-bottom: 5px;
+}
+
+.buttonRow button {
+  min-height: 32px;
+  font-size: 10px;
+}
+
+.status {
+  margin-top: 8px;
+  position: relative;
+}
+
+@media (max-width: 360px) {
+  .pairRow {
+    flex-wrap: wrap;
+  }
+
+  .pairRow .formatBtn {
+    width: 100%;
+    flex: 1 1 100%;
+  }
 }

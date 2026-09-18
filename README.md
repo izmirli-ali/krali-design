@@ -2,52 +2,59 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
-## v0.3.1
+## v0.4.0
 
-### Tek tık güncelleme
-- Panelin sağ üstünde **Sürümü Güncelle** butonu bulunur.
-- Buton, repo içindeki `scripts/update.command` dosyasını açar.
-- Bu dosya `git pull` çalıştırır.
-- UXP Developer Tool'da **Load & Watch** açıksa değişiklikler otomatik yüklenir.
-- UXP güvenliği nedeniyle ilk kullanımda macOS/Adobe izin penceresi gösterebilir.
+### UI düzeltmesi
+- UXP içinde boş görünen CSS Grid yapısı kaldırıldı.
+- Tüm Quick Action alanları Flexbox tabanına taşındı.
+- Dar Photoshop panelinde butonlar otomatik sarılır.
 
-### Quick tools
-- Reels / Story / 4:5 / 16:9 / 1:1 / Generic 9:16 Safe Zone
-- Safe Zone göster / gizle / temizle
-- Center / Fit / Fill
+### Aktif belge
+- Belge adı
+- Canvas ölçüsü
+- Seçili layer sayısı
+- Üst seviye layer sayısı
+
+### Safe Zone
+- Reels 9:16
+- Story 9:16
+- Post 4:5
+- Yatay 16:9
+- Kare 1:1
+- Genel 9:16
+- Göster / Gizle
+- Temizle
+
+### Yerleşim
+- Yatay ortala
+- Dikey ortala
+- Tam ortala
+- Fit
+- Fill
 - %80 / %90 / %100 genişlik
+- Dosyadan asset yerleştirme
+
+### Layer
 - Smart Object
-- Layer grouping
-- Layer rename
-- Dosyadan asset ekleme
+- Seçilileri grupla
+- Layer adlandır
+- Layer kopyala
 
 ### Marka Hafızası
-- Marka profili oluşturma
-- Logo / ürün / background / dekor / diğer asset kaydı
-- UXP persistent file token ile dosyayı tekrar seçmeden çağırma
-- Kayıtlı asseti tek tıkla Photoshop'a Smart Object olarak yerleştirme
-- Asseti hafızadan silme
-- Local Assistant içinden marka ve asset çağırma
+- Marka oluşturma
+- Logo / ürün / background / dekor assetleri
+- Persistent token ile assetleri tekrar seçmeden çağırma
 
-Örnek:
-
-`Vox beyaz logosunu ekle ve reels safe zone aç`
-
-Kayıtlı marka ve asset adı eşleşirse panel materyali yerleştirir ve Safe Zone'u uygular.
+### Tasarım Hafızası
+- **Tasarımı Öğren** ile aktif PSD'nin üst seviye layer düzenini kaydet
+- Layer adı, normalize edilmiş X/Y konumu, genişlik/yükseklik, opacity ve görünürlük kaydı
+- Kayıtlı tasarımı başka aynı isimli layer'lara **Uygula**
+- Farklı canvas ölçülerine yüzde bazlı uyarlama
 
 ## Güncelleme
 
-Finder:
+Panel sağ üstündeki **Sürümü Güncelle** butonunu kullan.
 
-`~/Documents/KRALI-DESIGN/scripts/update.command`
+UXP Developer Tool'da **Load & Watch** açık olmalıdır.
 
-veya Terminal:
-
-```bash
-cd ~/Documents/KRALI-DESIGN
-git pull
-```
-
-UXP Developer Tool'da **Load & Watch** açık bırakılabilir.
-
-Bu sürümde manifest değişmediği için yeniden Add Plugin gerekmez.
+v0.4.0 manifest değiştirmez; tekrar Add Plugin gerekmez.

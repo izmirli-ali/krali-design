@@ -14,6 +14,8 @@ const assetCount = document.getElementById("assetCount");
 const layoutList = document.getElementById("layoutList");
 const layoutCount = document.getElementById("layoutCount");
 const docInfo = document.getElementById("docInfo");
+const updateStatusEl = document.getElementById("updateStatus");
+const updateButtonEl = document.getElementById("updatePlugin");
 
 let lastSafePreset = null;
 let guidesVisible = true;
@@ -140,7 +142,8 @@ async function initMemory() {
 }
 
 async function saveMemory() {
-  if (!memoryFile) await initMemory();
+  if (!memoryFile) await setUpdateStatus("Mevcut sürüm: v" + CURRENT_VERSION);
+initMemory();
   await memoryFile.write(JSON.stringify(memory, null, 2));
 }
 
@@ -883,6 +886,8 @@ async function runAssistant() {
 }
 
 
+const CURRENT_VERSION = "0.6.2";
+
 const UPDATE_FILES = [
   "manifest.json",
   "index.html",
@@ -892,20 +897,50 @@ const UPDATE_FILES = [
   "VERSION"
 ];
 
+function setUpdateStatus(message) {
+  if (updateStatusEl) updateStatusEl.textContent = message;
+}
+
+function parseVersion(value) {
+  return String(value || "")
+    .replace(/^v/i, "")
+    .trim()
+    .split(".")
+    .map(part => Number(part) || 0);
+}
+
+function compareVersions(a, b) {
+  const av = parseVersion(a);
+  const bv = parseVersion(b);
+  const len = Math.max(av.length, bv.length);
+
+  for (let i = 0; i < len; i++) {
+    const ai = av[i] || 0;
+    const bi = bv[i] || 0;
+    if (ai > bi) return 1;
+    if (ai < bi) return -1;
+  }
+
+  return 0;
+}
+
 async function getUpdaterSettingsFile() {
   const folder = await fs.getDataFolder();
   let file;
+
   try {
     file = await folder.getEntry("krali-updater.json");
   } catch (_) {
     file = await folder.createFile("krali-updater.json", { overwrite: false });
     await file.write(JSON.stringify({ folderToken: "" }, null, 2));
   }
+
   return file;
 }
 
 async function readUpdaterSettings() {
   const file = await getUpdaterSettingsFile();
+
   try {
     const raw = await file.read();
     return raw ? JSON.parse(raw) : { folderToken: "" };
@@ -919,55 +954,125 @@ async function writeUpdaterSettings(settings) {
   await file.write(JSON.stringify(settings, null, 2));
 }
 
-async function getWritablePluginFolder() {
+async function resetUpdaterFolder() {
+  await writeUpdaterSettings({ folderToken: "" });
+  setUpdateStatus("Klasör izni sıfırlandı. Sonraki güncellemede KRALI-DESIGN klasörünü seç.");
+  setStatus("✓ Güncelleme klasörü izni sıfırlandı");
+}
+
+async function getWritablePluginFolder(forcePick) {
   const settings = await readUpdaterSettings();
 
-  if (settings.folderToken) {
+  if (!forcePick && settings.folderToken) {
     try {
       return await fs.getEntryForPersistentToken(settings.folderToken);
-    } catch (_) {}
+    } catch (_) {
+      setUpdateStatus("Eski klasör izni geçersiz. Klasörü tekrar seç.");
+    }
   }
 
-  setStatus("İlk kurulum: KRALI-DESIGN klasörünü seç...");
+  setUpdateStatus("KRALI-DESIGN klasörünü seç...");
   const folder = await fs.getFolder();
-  if (!folder) throw new Error("Klasör seçilmedi.");
+
+  if (!folder) {
+    throw new Error("Klasör seçimi iptal edildi.");
+  }
 
   const token = await fs.createPersistentToken(folder);
   await writeUpdaterSettings({ folderToken: token });
+
+  setUpdateStatus("Klasör kaydedildi: " + folder.name);
   return folder;
 }
 
 async function fetchGithubFile(path) {
-  const url = "https://raw.githubusercontent.com/izmirli-ali/krali-design/main/" + path + "?t=" + Date.now();
+  const url =
+    "https://raw.githubusercontent.com/izmirli-ali/krali-design/main/" +
+    path +
+    "?t=" +
+    Date.now();
+
   const response = await fetch(url, { cache: "no-store" });
-  if (!response.ok) throw new Error(path + " indirilemedi: HTTP " + response.status);
+
+  if (!response.ok) {
+    throw new Error(path + " indirilemedi (HTTP " + response.status + ")");
+  }
+
   return await response.text();
 }
 
-async function writeTextFile(folder, path, content) {
-  let file;
+async function getOrCreateFile(folder, path) {
   try {
-    file = await folder.getEntry(path);
+    return await folder.getEntry(path);
   } catch (_) {
-    file = await folder.createFile(path, { overwrite: true });
+    return await folder.createFile(path, { overwrite: true });
   }
+}
+
+async function writeTextFile(folder, path, content) {
+  const file = await getOrCreateFile(folder, path);
   await file.write(content);
 }
 
-async function updatePluginFromGitHub() {
-  const folder = await getWritablePluginFolder();
-
-  setStatus("GitHub sürümü kontrol ediliyor...");
+async function checkRemoteVersion() {
+  setUpdateStatus("GitHub sürümü kontrol ediliyor...");
   const remoteVersion = (await fetchGithubFile("VERSION")).trim();
 
-  for (let i = 0; i < UPDATE_FILES.length; i++) {
-    const path = UPDATE_FILES[i];
-    setStatus("Güncelleniyor: " + path + " (" + (i + 1) + "/" + UPDATE_FILES.length + ")");
-    const content = await fetchGithubFile(path);
-    await writeTextFile(folder, path, content);
+  const cmp = compareVersions(remoteVersion, CURRENT_VERSION);
+
+  if (cmp > 0) {
+    setUpdateStatus("Yeni sürüm bulundu: v" + remoteVersion + " • mevcut v" + CURRENT_VERSION);
+  } else if (cmp === 0) {
+    setUpdateStatus("Güncel sürümdesin: v" + CURRENT_VERSION);
+  } else {
+    setUpdateStatus("Yerel sürüm GitHub'dan daha yeni: v" + CURRENT_VERSION);
   }
 
-  setStatus("✓ KRALI DESIGN " + remoteVersion + " indirildi. Load & Watch birkaç saniye içinde paneli yenilemeli.");
+  return remoteVersion;
+}
+
+async function updatePluginFromGitHub() {
+  if (updateButtonEl) updateButtonEl.disabled = true;
+
+  try {
+    const remoteVersion = await checkRemoteVersion();
+
+    if (compareVersions(remoteVersion, CURRENT_VERSION) <= 0) {
+      setStatus("✓ Güncelleme gerekmiyor");
+      return;
+    }
+
+    const folder = await getWritablePluginFolder(false);
+
+    setUpdateStatus("Dosyalar indiriliyor...");
+
+    // Önce TÜM dosyaları belleğe indir.
+    // Böylece Load & Watch kaynak dosyası değişince reload etse bile
+    // yarım indirme ihtimali azalır.
+    const downloaded = await Promise.all(
+      UPDATE_FILES.map(async path => {
+        const content = await fetchGithubFile(path);
+        return { path, content };
+      })
+    );
+
+    setUpdateStatus("Dosyalar yazılıyor...");
+
+    // Kaynak değişikliklerini mümkün olduğunca toplu uygula.
+    await Promise.all(
+      downloaded.map(item => writeTextFile(folder, item.path, item.content))
+    );
+
+    setUpdateStatus("✓ v" + remoteVersion + " kuruldu • panel yenileniyor...");
+    setStatus("✓ KRALI DESIGN v" + remoteVersion + " güncellendi");
+  } catch (err) {
+    console.error("Updater error:", err);
+    const message = err && err.message ? err.message : String(err);
+    setUpdateStatus("Hata: " + message);
+    throw err;
+  } finally {
+    if (updateButtonEl) updateButtonEl.disabled = false;
+  }
 }
 
 
@@ -981,6 +1086,7 @@ async function guarded(fn) {
 }
 
 document.getElementById("updatePlugin").addEventListener("click", () => guarded(updatePluginFromGitHub));
+document.getElementById("resetUpdateFolder").addEventListener("click", () => guarded(resetUpdaterFolder));
 document.getElementById("refreshDoc").addEventListener("click", () => guarded(refreshDocInfo));
 
 document.querySelectorAll("[data-format]").forEach(btn => {

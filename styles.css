@@ -479,3 +479,38 @@ section {
   opacity: .55;
   cursor: default;
 }
+
+
+/* v0.6.4 updater verification + readability */
+.updaterOkBadge {
+  flex: 0 0 auto;
+  padding: 3px 6px;
+  border-radius: 999px;
+  background: #2d5f3a;
+  border: 1px solid #3d7b4d;
+  color: #d8f4de;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+.formatMode select {
+  color: #f2f2f2 !important;
+  background: #262626 !important;
+  border-color: #4a4a4a !important;
+}
+
+.formatMode select option {
+  color: #f2f2f2;
+  background: #262626;
+}
+
+.checkLine,
+.checkLine span {
+  color: #d0d0d0 !important;
+  opacity: 1 !important;
+}
+
+.checkLine input[type="checkbox"]:disabled + span {
+  color: #8a8a8a !important;
+}

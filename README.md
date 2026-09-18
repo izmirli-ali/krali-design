@@ -2,6 +2,14 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
+### v0.11.9 — Yerleşim sadeleştirme
+- Layer bölümü arayüzden tamamen kaldırıldı.
+- Yerleşim bölümü 3×3 hizalama pedi + Fit + Fill olacak şekilde sadeleştirildi.
+- Yatay Ortala / Dikey Ortala / Tam Ortala ve Dağıt kontrolleri kaldırıldı; aynı hizalama işlemleri 3×3 pad üzerinden yapılır.
+- %5 güvenli kenar payı seçeneği korundu.
+- UXP uyumluluğu için hizalama pedi CSS Grid yerine Flexbox kullanır.
+
+
 ### v0.11.8 — Görünüm v0.11.5'e geri alındı
 - v0.11.6 ve v0.11.7 responsive tam-yükseklik CSS değişiklikleri tamamen kaldırıldı.
 - Panel görünümü ve scroll davranışı v0.11.5'teki stabil düzene geri döndü.

@@ -384,3 +384,61 @@ section {
     flex: 1 1 100%;
   }
 }
+
+
+/* v0.6.1 — compact format icons */
+.formatIcons {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 6px;
+  margin: 7px 0 8px;
+}
+
+.formatIconBtn {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 62px;
+  padding: 6px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background: #303030;
+  border: 1px solid #444;
+}
+
+.formatIconBtn:hover {
+  background: #3a3a3a;
+  border-color: #575757;
+}
+
+.ratioIcon {
+  display: block;
+  border: 2px solid #d5d5d5;
+  border-radius: 3px;
+  opacity: .9;
+}
+
+.ratio916 { width: 13px; height: 24px; }
+.ratio45 { width: 18px; height: 23px; }
+.ratio11 { width: 21px; height: 21px; }
+.ratio169 { width: 28px; height: 16px; }
+
+.ratioLabel {
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  color: #d0d0d0;
+}
+
+@media (max-width: 310px) {
+  .formatIcons { gap: 4px; }
+  .formatIconBtn {
+    min-height: 58px;
+    padding-left: 2px;
+    padding-right: 2px;
+  }
+  .ratioLabel { font-size: 8px; }
+}

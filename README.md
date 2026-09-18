@@ -2,7 +2,7 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
-### v0.7.0 — Single Bundle Updater
+### v0.7.1 — Single Bundle Updater
 - UI, tema ve çalışma mantığı `app.bundle.js` içinde birleştirildi.
 - `index.html` artık yalnızca sabit bootstrap dosyasıdır.
 - Panel içi updater bundan sonra yalnızca `app.bundle.js` dosyasını günceller.

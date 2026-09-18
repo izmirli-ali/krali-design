@@ -1,4 +1,4 @@
-// KRALI 100 YILLIK DENEYİM v0.11.12 — single-file runtime bundle
+// KRALI 100 YILLIK DENEYİM v0.11.13 — single-file runtime bundle
 (function () {
   const style = document.createElement("style");
   style.textContent = `* { box-sizing: border-box; }
@@ -1763,63 +1763,10 @@ input[type="checkbox"] {
     </section>
 
     <section>
-      <h2>MARKA HAFIZASI</h2>
-
-      <select id="brandSelect" aria-label="Marka seç">
-        <option value="">Marka seç...</option>
-      </select>
-
-      <div class="inlineForm">
-        <input id="newBrandName" type="text" placeholder="Yeni marka adı" />
-        <button id="addBrand" class="accent compact">Marka Ekle</button>
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="inlineForm">
-        <input id="assetName" type="text" placeholder="Asset adı (örn. Beyaz Logo)" />
-        <select id="assetType" aria-label="Asset türü">
-          <option value="logo">Logo</option>
-          <option value="product">Ürün</option>
-          <option value="background">Background</option>
-          <option value="decor">Dekor</option>
-          <option value="other">Diğer</option>
-        </select>
-      </div>
-
-      <button id="registerAsset" class="accent">Dosyayı Hafızaya Kaydet</button>
-
-      <div class="listHead">
-        <span>Kayıtlı Assetler</span>
-        <span id="assetCount">0</span>
-      </div>
-      <div id="assetList" class="memoryList">
-        <div class="empty">Önce bir marka oluştur.</div>
-      </div>
-    </section>
-
-    <section>
-      <h2>TASARIM HAFIZASI</h2>
-      <div class="tiny">Açık PSD'deki üst seviye layer konumlarını, ölçülerini ve görünürlük değerlerini aktif markaya kaydeder.</div>
-      <div class="inlineForm topGap">
-        <input id="layoutName" type="text" placeholder="Tasarım adı (örn. Cold Brew Post)" />
-        <button id="learnLayout" class="accent compact">Tasarımı Öğren</button>
-      </div>
-
-      <div class="listHead">
-        <span>Kayıtlı Tasarımlar</span>
-        <span id="layoutCount">0</span>
-      </div>
-      <div id="layoutList" class="memoryList">
-        <div class="empty">Henüz tasarım kaydı yok.</div>
-      </div>
-    </section>
-
-    <section>
-      <h2>LOCAL ASSISTANT</h2>
-      <textarea id="assistantPrompt" placeholder="Örn: Vox beyaz logosunu ekle, reels safe zone aç ve ortala"></textarea>
-      <button id="assistantRun" class="accent">Komutu Çalıştır</button>
-      <div class="tiny">Marka/asset çağırma + safe zone + fit/fill/ortalama komutlarını lokal olarak çalıştırır.</div>
+      <h2>ÜRETİM ASİSTANI</h2>
+      <textarea id="assistantPrompt" placeholder="Örn: Reels hazırla, asset ekle ve sağ üste %5 payla hizala"></textarea>
+      <button id="assistantRun" class="accent">Asistana Uygulat</button>
+      <div class="tiny">Format, Safe Zone, dosyadan asset ekleme, 3×3 yerleşim, Fit ve Fill komutlarını uygular.</div>
     </section>
 
     <div id="status" class="status">KRALI 100 YILLIK DENEYİM hazırlanıyor...</div>
@@ -2957,26 +2904,16 @@ async function runAssistant() {
 
   let didSomething = false;
 
-  const commandBrand = findBrandFromCommand(raw);
-  if (commandBrand) {
-    memory.selectedBrandId = commandBrand.id;
-    brandSelect.value = commandBrand.id;
-    await saveMemory();
-    renderAssets();
-    renderLayouts();
+  if (input.includes("reels")) { await applyScalePreset("vertical"); await applySafePreset("reels"); didSomething = true; }
+  else if (input.includes("story") || input.includes("hikaye")) { await applyScalePreset("vertical"); await applySafePreset("story"); didSomething = true; }
+  else if (input.includes("4:5") || input.includes("4x5")) { await applyScalePreset("post45"); await applySafePreset("post45"); didSomething = true; }
+  else if (input.includes("16:9") || input.includes("16x9") || input.includes("yatay")) { await applyScalePreset("horizontal"); await applySafePreset("wide169"); didSomething = true; }
+  else if (input.includes("kare") || input.includes("1:1")) { await applyScalePreset("square"); await applySafePreset("square"); didSomething = true; }
 
-    const commandAsset = findAssetFromCommand(commandBrand, raw);
-    if (commandAsset) {
-      await placeMemoryAsset(commandAsset);
-      didSomething = true;
-    }
+  if (input.includes("asset") || input.includes("gorsel") || input.includes("görsel") || input.includes("dosya")) {
+    await placeAsset();
+    didSomething = true;
   }
-
-  if (input.includes("reels")) { await applySafePreset("reels"); didSomething = true; }
-  else if (input.includes("story") || input.includes("hikaye")) { await applySafePreset("story"); didSomething = true; }
-  else if (input.includes("4:5") || input.includes("4x5")) { await applySafePreset("post45"); didSomething = true; }
-  else if (input.includes("16:9") || input.includes("16x9") || input.includes("yatay")) { await applySafePreset("wide169"); didSomething = true; }
-  else if (input.includes("kare") || input.includes("1:1")) { await applySafePreset("square"); didSomething = true; }
 
   if (input.includes("smart")) { await convertToSmartObject(); didSomething = true; }
   if (input.includes("grupla") || input.includes("grup")) { await groupSelectedLayers(); didSomething = true; }
@@ -2985,12 +2922,21 @@ async function runAssistant() {
   else if (input.includes("fit") || input.includes("sigdir")) { await scaleAndCenter("fit"); didSomething = true; }
   else if (input.includes("ortala") || input.includes("merkez")) { await alignSelected("both"); didSomething = true; }
 
-  if (!didSomething) throw new Error("Komut anlaşılmadı veya eşleşen kayıtlı asset bulunamadı.");
-  setStatus("✓ Lokal Assistant komutu tamamlandı");
+  const pointCommands = [
+    ["sag ust", "tr"], ["sağ üst", "tr"], ["sol ust", "tl"], ["sol üst", "tl"],
+    ["sag alt", "br"], ["sağ alt", "br"], ["sol alt", "bl"], ["ust orta", "tc"],
+    ["üst orta", "tc"], ["alt orta", "bc"], ["sag orta", "mr"], ["sağ orta", "mr"],
+    ["sol orta", "ml"]
+  ];
+  const pointCommand = pointCommands.find(([phrase]) => input.includes(phrase));
+  if (pointCommand) { await alignLayerToPoint(pointCommand[1]); didSomething = true; }
+
+  if (!didSomething) throw new Error("Komut anlaşılmadı. Örn: Reels hazırla, asset ekle, sağ üste hizala, fit.");
+  setStatus("✓ Üretim Asistanı komutu tamamlandı");
 }
 
 
-const CURRENT_VERSION = "0.11.12";
+const CURRENT_VERSION = "0.11.13";
 
 const UPDATE_FILES = ["app.bundle.js"];
 
@@ -3207,24 +3153,11 @@ const placeAssetBtn = document.getElementById("placeAsset");
 if (placeAssetBtn) placeAssetBtn.addEventListener("click", () => guarded(placeAsset));
 
 document.getElementById("assistantRun").addEventListener("click", () => guarded(runAssistant));
-document.getElementById("addBrand").addEventListener("click", () => guarded(addBrand));
-document.getElementById("registerAsset").addEventListener("click", () => guarded(registerAsset));
-document.getElementById("learnLayout").addEventListener("click", () => guarded(learnLayout));
-
-brandSelect.addEventListener("change", () => guarded(async () => {
-  memory.selectedBrandId = brandSelect.value;
-  await saveMemory();
-  renderAssets();
-  renderLayouts();
-  const brand = getSelectedBrand();
-  setStatus(brand ? "✓ Aktif marka: " + brand.name : "Marka seçilmedi");
-}));
-
 function runUiSelfCheck() {
   const requiredIds = [
     "updatePlugin", "placeAssetTop", "safeZoneToggle",
     "fitLayer", "fillLayer",
-    "assistantRun", "addBrand", "registerAsset", "learnLayout"
+    "assistantRun"
   ];
 
   const missing = requiredIds.filter(id => !document.getElementById(id));
@@ -3250,4 +3183,3 @@ runUiSelfCheck();
 const runtimeVersionEl = document.querySelector(".version");
 if (runtimeVersionEl) runtimeVersionEl.textContent = "v" + CURRENT_VERSION;
 setStatus("KRALI 100 YILLIK DENEYİM v" + CURRENT_VERSION + " hazır");
-initMemory();

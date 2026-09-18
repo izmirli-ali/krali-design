@@ -49,6 +49,13 @@ for key in ("reels", "story", "post45", "wide169", "square", "generic916"):
 
 expect('safeZoneToggle.addEventListener("click", () => guarded(toggleSafeZone))' in BUNDLE, "Safe Zone toggle bağlantısı eksik.")
 
+for obsolete_id in ("brandSelect", "addBrand", "registerAsset", "learnLayout", "layoutName"):
+    expect(f'id="{obsolete_id}"' not in BUNDLE, f"Kaldırılmış manuel hafıza kontrolü hâlâ arayüzde: {obsolete_id}")
+
+expect('id="assistantPrompt"' in BUNDLE, "Üretim Asistanı komut alanı eksik.")
+expect('id="assistantRun"' in BUNDLE, "Üretim Asistanı çalıştırma butonu eksik.")
+expect("await placeAsset();" in BUNDLE, "Asistanın dosyadan asset ekleme aksiyonu eksik.")
+
 for key in ("tl", "tc", "tr", "ml", "mc", "mr", "bl", "bc", "br"):
     expect(occurrences(fr'data-align-point="{key}"') == 1, f"Hizalama noktası tam bir kez görünmeli: {key}")
 

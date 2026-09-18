@@ -2,6 +2,11 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
+### v0.11.13 — Üretim Asistanı odağı
+- Manuel Marka Hafızası ve Tasarım Hafızası bölümleri panelden kaldırıldı.
+- Local Assistant, Üretim Asistanı olarak sadeleştirildi: format + Safe Zone, dosyadan asset ekleme, 3×3 hizalama, Fit ve Fill komutlarını uygular.
+- Örnek: `Reels hazırla, asset ekle ve sağ üste %5 payla hizala`.
+
 ### v0.11.12 — Ölçek preset bağlantısı ve arayüz denetimi
 - 9:16, 4:5, 1:1 ve 16:9 canvas presetleri artık panel açılışında yalnızca bir kez bağlanır.
 - Safe Zone çalıştırılırken tekrar tekrar event listener eklenmesine neden olan yanlış bağlantı kaldırıldı.

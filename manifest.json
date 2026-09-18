@@ -1,0 +1,23 @@
+{
+  "manifestVersion": 5,
+  "id": "com.krali.design",
+  "name": "KRALI DESIGN",
+  "version": "0.2.1",
+  "main": "index.html",
+  "host": {
+    "app": "PS",
+    "minVersion": "25.0.0"
+  },
+  "requiredPermissions": {
+    "localFileSystem": "request"
+  },
+  "entrypoints": [
+    {
+      "type": "panel",
+      "id": "kraliDesignPanel",
+      "label": { "default": "KRALI DESIGN" },
+      "minimumSize": { "width": 300, "height": 520 },
+      "preferredDockedSize": { "width": 340, "height": 760 }
+    }
+  ]
+}

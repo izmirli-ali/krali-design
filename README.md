@@ -2,6 +2,15 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
+### v0.10.0 — Workflow Tools
+- Yerleşim bölümüne 9 noktalı hizalama grid'i eklendi.
+- Hizalamada isteğe bağlı %5 güvenli kenar payı eklendi.
+- Layer görünürlük aç/kapat kontrolü eklendi.
+- Layer kilitle/kilidi aç kontrolü eklendi.
+- Layer'ı en öne getir / en arkaya gönder kontrolleri eklendi.
+- Yerleşim ve Layer butonları daha kompakt hale getirildi.
+
+
 ### v0.9.1 — Stabilization
 - `saveMemory()` içine yanlışlıkla taşınmış updater kodu temizlendi.
 - Güncelle butonu artık işlem sırasında `disabled` yapılmıyor.

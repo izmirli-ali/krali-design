@@ -2,7 +2,7 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
-## v0.6.2
+## v0.6.3
 
 ### UI düzeltmesi
 - UXP içinde boş görünen CSS Grid yapısı kaldırıldı.
@@ -14,6 +14,12 @@ Photoshop için UXP tabanlı workflow hızlandırma paneli.
 - Canvas ölçüsü
 - Seçili layer sayısı
 - Üst seviye layer sayısı
+
+### Updater klasör seçimi düzeltmesi
+- **Klasörü Yeniden Seç** artık yalnızca token sıfırlamaz.
+- Butona basınca doğrudan klasör seçici açılır.
+- Seçilen KRALI-DESIGN klasörü anında persistent token ile kaydedilir.
+- Güncel sürümde olsan bile klasör izni önceden tanımlanabilir.
 
 ### Updater v2
 - Panelin üstünde ayrı güncelleme durum satırı var.
@@ -96,4 +102,4 @@ Panel sağ üstündeki **Sürümü Güncelle** butonunu kullan.
 
 UXP Developer Tool'da **Load & Watch** açık olmalıdır.
 
-v0.6.2 manifest değiştirmez. v0.6.1 updater çalışmıyorsa bu sürümü bir kez update.command veya git pull ile al; sonrasında updater v2 kullanılacak.
+v0.6.3 manifest değiştirmez. Bu sürüm klasör seçici davranışını düzeltir.nd veya git pull ile al; sonrasında updater v2 kullanılacak.

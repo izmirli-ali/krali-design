@@ -2,6 +2,14 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
+### v0.8.1 — Final UI cleanup
+- Eski statik v0.7.0 etiketi kaldırıldı.
+- Üst sürüm etiketi runtime CURRENT_VERSION ile zorunlu eşlenir.
+- Bundle Updater / Klasör / updater durum kutusu tamamen kaldırıldı.
+- Üstte yalnızca Güncelle ve sürüm etiketi bırakıldı.
+- Hızlı Format açıklama metni kaldırıldı.
+- Panel kartları ve header daha sade hale getirildi.
+
 ### v0.8.0 — UI cleanup
 - Üst sürüm etiketi artık `CURRENT_VERSION` değerinden runtime'da senkronlanır.
 - Updater rozeti kaldırıldı; güncelleme alanı tek satıra indirildi.

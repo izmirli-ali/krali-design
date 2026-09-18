@@ -1,4 +1,4 @@
-// KRALI DESIGN v0.7.0 — single-file runtime bundle
+// KRALI DESIGN v0.7.1 — single-file runtime bundle
 (function () {
   const style = document.createElement("style");
   style.textContent = `* { box-sizing: border-box; }
@@ -718,6 +718,10 @@ input[type="checkbox"] {
 }
 `;
   document.head.appendChild(style);
+
+  const accentStyle = document.createElement("style");
+  accentStyle.textContent = `.brandBlock::after{content:"";display:block;width:42px;height:3px;margin-top:7px;border-radius:999px;background:#ff4141;box-shadow:0 0 10px rgba(255,65,65,.28)} .version{color:#ff7a7a !important;font-weight:700}`;
+  document.head.appendChild(accentStyle);
 
   document.body.innerHTML = `<div class="app">
     <header class="topbar">
@@ -1789,7 +1793,7 @@ async function runAssistant() {
 }
 
 
-const CURRENT_VERSION = "0.7.0";
+const CURRENT_VERSION = "0.7.1";
 
 const UPDATE_FILES = ["app.bundle.js"];
 

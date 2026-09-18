@@ -1,4 +1,4 @@
-// KRALI DESIGN v0.9.1 — single-file runtime bundle
+// KRALI DESIGN v0.10.0 — single-file runtime bundle
 (function () {
   const style = document.createElement("style");
   style.textContent = `* { box-sizing: border-box; }
@@ -1008,6 +1008,71 @@ input[type="checkbox"] {
   `;
   document.head.appendChild(v091Style);
 
+  const v0100Style = document.createElement("style");
+  v0100Style.textContent = `
+    /* v0.10.0 workflow tools */
+    .safeAlignToggle{
+      display:flex;
+      align-items:center;
+      gap:4px;
+      color:#8d8d8d;
+      font-size:8px;
+      cursor:pointer;
+    }
+    .safeAlignToggle input{
+      width:13px;
+      height:13px;
+      margin:0;
+      accent-color:#ff4141;
+    }
+    .alignGrid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:4px;
+      margin:6px 0;
+      padding:4px;
+      border:1px solid #252525;
+      border-radius:8px;
+      background:#090909;
+    }
+    .alignGrid button{
+      min-height:28px !important;
+      padding:0 !important;
+      font-size:13px !important;
+      background:#121212 !important;
+      border-color:#272727 !important;
+    }
+    .alignGrid button:hover,
+    .alignGrid .alignCenter{
+      border-color:#5d2222 !important;
+    }
+    .alignGrid .alignCenter{
+      color:#ff5f5f !important;
+      font-size:16px !important;
+    }
+    .buttonRow.four{
+      display:flex;
+      gap:4px;
+      margin-top:4px;
+    }
+    .buttonRow.four button{
+      flex:1 1 25%;
+      min-height:28px !important;
+      padding:0 3px !important;
+      font-size:9px !important;
+    }
+    .layerQuickRow button{
+      background:#0f0f0f !important;
+      border-color:#292929 !important;
+    }
+    .layerQuickRow button:hover{
+      border-color:#ff4141 !important;
+      background:#211111 !important;
+    }
+  `;
+  document.head.appendChild(v0100Style);
+
+
   document.body.innerHTML = `<div class="app">
     <header class="topbar">
       <div class="brandBlock">
@@ -1016,7 +1081,7 @@ input[type="checkbox"] {
       </div>
       <div class="topActions">
         <button id="updatePlugin" class="updateBtn">Güncelle</button>
-        <div class="version">v0.9.1</div>
+        <div class="version">v0.10.0</div>
       </div>
     </header>
 
@@ -1092,7 +1157,26 @@ input[type="checkbox"] {
     </section>
 
     <section>
-      <h2>YERLEŞİM</h2>
+      <div class="sectionHead">
+        <h2>YERLEŞİM</h2>
+        <label class="safeAlignToggle">
+          <input id="safeAlignMargin" type="checkbox" checked />
+          <span>%5 pay</span>
+        </label>
+      </div>
+
+      <div class="alignGrid">
+        <button data-align-point="tl" title="Sol Üst">↖</button>
+        <button data-align-point="tc" title="Üst Orta">↑</button>
+        <button data-align-point="tr" title="Sağ Üst">↗</button>
+        <button data-align-point="ml" title="Sol Orta">←</button>
+        <button data-align-point="mc" class="alignCenter" title="Tam Ortala">•</button>
+        <button data-align-point="mr" title="Sağ Orta">→</button>
+        <button data-align-point="bl" title="Sol Alt">↙</button>
+        <button data-align-point="bc" title="Alt Orta">↓</button>
+        <button data-align-point="br" title="Sağ Alt">↘</button>
+      </div>
+
       <div class="buttonRow three">
         <button id="centerH">Yatay Ortala</button>
         <button id="centerV">Dikey Ortala</button>
@@ -1101,12 +1185,12 @@ input[type="checkbox"] {
       <div class="buttonRow three">
         <button id="fitLayer">Fit</button>
         <button id="fillLayer">Fill</button>
-        <button id="placeAsset">Dosyadan Asset</button>
+        <button id="placeAsset">Asset</button>
       </div>
       <div class="buttonRow three">
-        <button data-widthpct="80">%80 En</button>
-        <button data-widthpct="90">%90 En</button>
-        <button data-widthpct="100">%100 En</button>
+        <button data-widthpct="80">%80</button>
+        <button data-widthpct="90">%90</button>
+        <button data-widthpct="100">%100</button>
       </div>
     </section>
 
@@ -1114,9 +1198,16 @@ input[type="checkbox"] {
       <h2>LAYER</h2>
       <div class="buttonRow two">
         <button id="smartObject">Smart Object</button>
-        <button id="groupLayers">Seçilileri Grupla</button>
-        <button id="renameLayer">Layer Adlandır</button>
+        <button id="groupLayers">Grupla</button>
+        <button id="renameLayer">Adlandır</button>
         <button id="duplicateLayer">Kopyala</button>
+      </div>
+
+      <div class="buttonRow four layerQuickRow">
+        <button id="toggleLayerVisible" title="Görünürlük">👁</button>
+        <button id="toggleLayerLock" title="Kilitle / Kilidi Aç">🔒</button>
+        <button id="bringLayerFront" title="En Öne Getir">↑↑</button>
+        <button id="sendLayerBack" title="En Arkaya Gönder">↓↓</button>
       </div>
     </section>
 
@@ -1905,6 +1996,101 @@ async function alignSelected(axis) {
   setStatus(axis === "h" ? "✓ Yatay ortalandı" : axis === "v" ? "✓ Dikey ortalandı" : "✓ Tam ortalandı");
 }
 
+async function alignLayerToPoint(point) {
+  await modal("9 Nokta Hizala", async () => {
+    const doc = getDoc();
+    const layer = getLayer();
+    const b = layerBounds(layer);
+    const docW = px(doc.width);
+    const docH = px(doc.height);
+    const lw = b.right - b.left;
+    const lh = b.bottom - b.top;
+
+    const useSafe = !!document.getElementById("safeAlignMargin")?.checked;
+    const mx = useSafe ? docW * 0.05 : 0;
+    const my = useSafe ? docH * 0.05 : 0;
+
+    const leftX = mx;
+    const centerX = (docW - lw) / 2;
+    const rightX = docW - mx - lw;
+
+    const topY = my;
+    const centerY = (docH - lh) / 2;
+    const bottomY = docH - my - lh;
+
+    const map = {
+      tl: [leftX, topY],
+      tc: [centerX, topY],
+      tr: [rightX, topY],
+      ml: [leftX, centerY],
+      mc: [centerX, centerY],
+      mr: [rightX, centerY],
+      bl: [leftX, bottomY],
+      bc: [centerX, bottomY],
+      br: [rightX, bottomY]
+    };
+
+    const target = map[point];
+    if (!target) throw new Error("Hizalama noktası bulunamadı.");
+
+    await layer.translate(target[0] - b.left, target[1] - b.top);
+  });
+
+  setStatus("✓ Layer hizalandı" + (document.getElementById("safeAlignMargin")?.checked ? " • %5 pay" : ""));
+}
+
+async function toggleSelectedLayerVisibility() {
+  const layer = getLayer();
+  await modal("Layer Görünürlük", async () => {
+    layer.visible = !layer.visible;
+  });
+  setStatus(layer.visible ? "✓ Layer görünür" : "✓ Layer gizlendi");
+}
+
+async function toggleSelectedLayerLock() {
+  const layer = getLayer();
+  await modal("Layer Kilit", async () => {
+    if ("locked" in layer) {
+      layer.locked = !layer.locked;
+      return;
+    }
+
+    await batchPlay([{
+      _obj: "set",
+      _target: [{ _ref: "layer", _enum: "ordinal", _value: "targetEnum" }],
+      to: {
+        _obj: "layer",
+        layerLocking: {
+          _obj: "layerLocking",
+          protectAll: true
+        }
+      },
+      _options: { dialogOptions: "dontDisplay" }
+    }], {});
+  });
+
+  setStatus("✓ Layer kilit durumu değiştirildi");
+}
+
+async function moveSelectedLayerToEdge(direction) {
+  getLayer();
+
+  await modal(direction === "front" ? "Layer En Öne" : "Layer En Arkaya", async () => {
+    await batchPlay([{
+      _obj: "move",
+      _target: [{ _ref: "layer", _enum: "ordinal", _value: "targetEnum" }],
+      to: {
+        _ref: "layer",
+        _enum: "ordinal",
+        _value: direction === "front" ? "front" : "back"
+      },
+      _options: { dialogOptions: "dontDisplay" }
+    }], {});
+  });
+
+  setStatus(direction === "front" ? "✓ Layer en öne getirildi" : "✓ Layer en arkaya gönderildi");
+}
+
 async function scaleAndCenter(mode) {
   await modal(mode === "fit" ? "Fit" : "Fill", async () => {
     const doc = getDoc();
@@ -2077,7 +2263,7 @@ async function runAssistant() {
 }
 
 
-const CURRENT_VERSION = "0.9.1";
+const CURRENT_VERSION = "0.10.0";
 
 const UPDATE_FILES = ["app.bundle.js"];
 
@@ -2287,6 +2473,10 @@ document.querySelectorAll("[data-safe]").forEach(btn => {
 document.getElementById("toggleGuides").addEventListener("click", () => guarded(toggleGuides));
 document.getElementById("clearGuides").addEventListener("click", () => guarded(clearGuides));
 
+document.querySelectorAll("[data-align-point]").forEach(btn => {
+  btn.addEventListener("click", () => guarded(() => alignLayerToPoint(btn.dataset.alignPoint)));
+});
+
 document.getElementById("centerH").addEventListener("click", () => guarded(() => alignSelected("h")));
 document.getElementById("centerV").addEventListener("click", () => guarded(() => alignSelected("v")));
 document.getElementById("centerLayer").addEventListener("click", () => guarded(() => alignSelected("both")));
@@ -2301,6 +2491,10 @@ document.getElementById("smartObject").addEventListener("click", () => guarded(c
 document.getElementById("groupLayers").addEventListener("click", () => guarded(groupSelectedLayers));
 document.getElementById("renameLayer").addEventListener("click", () => guarded(renameSelectedLayer));
 document.getElementById("duplicateLayer").addEventListener("click", () => guarded(duplicateSelectedLayer));
+document.getElementById("toggleLayerVisible").addEventListener("click", () => guarded(toggleSelectedLayerVisibility));
+document.getElementById("toggleLayerLock").addEventListener("click", () => guarded(toggleSelectedLayerLock));
+document.getElementById("bringLayerFront").addEventListener("click", () => guarded(() => moveSelectedLayerToEdge("front")));
+document.getElementById("sendLayerBack").addEventListener("click", () => guarded(() => moveSelectedLayerToEdge("back")));
 document.getElementById("placeAsset").addEventListener("click", () => guarded(placeAsset));
 
 document.getElementById("assistantRun").addEventListener("click", () => guarded(runAssistant));

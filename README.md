@@ -2,6 +2,13 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
+### v0.11.7 — Responsive layout fix
+- v0.11.6'da kartları dikeyde sıkıştıran flex yerleşim kaldırıldı.
+- Panel dock yüksekliğinin tamamını kullanmaya devam eder.
+- Kartlar doğal yüksekliğini korur; yalnızca taşan içerik dikey scroll olur.
+- Bölümlerin üst üste binmesi ve butonların ezilmesi düzeltildi.
+
+
 ### v0.11.6 — Full-height responsive panel
 - Panel kökü Photoshop dock alanının mevcut yüksekliğini `height: 100%` ile dolduracak şekilde düzenlendi.
 - `.app` flex container yapısına geçirildi ve kullanılabilir dikey alanı tamamen kullanır hale getirildi.

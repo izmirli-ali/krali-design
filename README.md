@@ -2,6 +2,13 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
+### v0.11.11 — Hizalama yön sırası düzeltmesi
+- 3×3 hizalama matrisi tek flex-wrap yerine 3 ayrı satıra ayrıldı.
+- Her satır `direction:ltr` ile Sol → Orta → Sağ sırasına sabitlendi.
+- Sağ üst kutu kesin olarak `tr`, sol üst kutu `tl` aksiyonuna bağlıdır.
+- İşlem sonrası durum satırında seçilen hedef adı (örn. Sağ Üst) gösterilir.
+
+
 ### v0.11.10 — Kompakt 3×3 hizalama
 - Yerleşim yön kontrolleri 9 adet gerçek kare butondan oluşan kompakt 3×3 matrise çevrildi.
 - Matris yaklaşık 104 px genişliğinde ve ortalanmış şekilde gösterilir.

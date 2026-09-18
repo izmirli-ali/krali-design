@@ -886,7 +886,7 @@ async function runAssistant() {
 }
 
 
-const CURRENT_VERSION = "0.6.3";
+const CURRENT_VERSION = "0.6.5";
 
 const UPDATE_FILES = [
   "manifest.json",

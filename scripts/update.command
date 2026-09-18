@@ -13,7 +13,10 @@ fi
 cd "$REPO_DIR"
 
 echo "KRALI DESIGN güncelleniyor..."
-git pull --ff-only
+echo "GitHub ana sürümüyle birebir eşitleniyor..."
+
+git fetch origin main
+git reset --hard origin/main
 
 echo ""
 echo "Güncelleme tamamlandı."

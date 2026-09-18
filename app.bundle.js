@@ -1,4 +1,4 @@
-// KRALI DESIGN v0.9.0 — single-file runtime bundle
+// KRALI DESIGN v0.9.1 — single-file runtime bundle
 (function () {
   const style = document.createElement("style");
   style.textContent = `* { box-sizing: border-box; }
@@ -986,6 +986,28 @@ input[type="checkbox"] {
   `;
   document.head.appendChild(v090Style);
 
+
+  const v091Style = document.createElement("style");
+  v091Style.textContent = `
+    /* v0.9.1 updater stabilization */
+    .updateBtn{
+      position:relative !important;
+      z-index:20 !important;
+      pointer-events:auto !important;
+      user-select:none !important;
+      min-width:76px !important;
+    }
+    .topActions{
+      position:relative !important;
+      z-index:19 !important;
+      pointer-events:auto !important;
+    }
+    .resizeModeState{display:none !important}
+    .modeToggle{display:flex !important}
+    .safeGrid{display:flex !important}
+  `;
+  document.head.appendChild(v091Style);
+
   document.body.innerHTML = `<div class="app">
     <header class="topbar">
       <div class="brandBlock">
@@ -994,7 +1016,7 @@ input[type="checkbox"] {
       </div>
       <div class="topActions">
         <button id="updatePlugin" class="updateBtn">Güncelle</button>
-        <div class="version">v0.8.1</div>
+        <div class="version">v0.9.1</div>
       </div>
     </header>
 
@@ -1010,10 +1032,14 @@ input[type="checkbox"] {
       <h2>HIZLI FORMAT</h2>
 
       <div class="formatMode">
-        <select id="resizeMode" aria-label="Ölçekleme modu">
+        <select id="resizeMode" class="resizeModeState" aria-label="Ölçekleme modu">
           <option value="smart">Akıllı Uyarla</option>
           <option value="canvas">Sadece Canvas</option>
         </select>
+        <div class="modeToggle">
+          <button class="modeBtn active" data-resize-mode="smart">Akıllı</button>
+          <button class="modeBtn" data-resize-mode="canvas">Canvas</button>
+        </div>
 
         <label class="checkLine">
           <input id="duplicateBeforeResize" type="checkbox" checked />
@@ -1051,13 +1077,13 @@ input[type="checkbox"] {
 
     <section>
       <h2>SAFE ZONE</h2>
-      <div class="buttonRow two">
-        <button class="primary" data-safe="reels">Reels 9:16</button>
-        <button class="primary" data-safe="story">Story 9:16</button>
-        <button class="primary" data-safe="post45">Post 4:5</button>
-        <button class="primary" data-safe="wide169">Yatay 16:9</button>
-        <button class="primary" data-safe="square">Kare 1:1</button>
-        <button class="primary" data-safe="generic916">Genel 9:16</button>
+      <div class="safeGrid">
+        <button class="primary" data-safe="reels">Reels<span>9:16</span></button>
+        <button class="primary" data-safe="story">Story<span>9:16</span></button>
+        <button class="primary" data-safe="post45">Post<span>4:5</span></button>
+        <button class="primary" data-safe="wide169">Yatay<span>16:9</span></button>
+        <button class="primary" data-safe="square">Kare<span>1:1</span></button>
+        <button class="primary" data-safe="generic916">Genel<span>9:16</span></button>
       </div>
       <div class="buttonRow two">
         <button id="toggleGuides" class="secondary">Göster / Gizle</button>
@@ -1308,12 +1334,7 @@ async function initMemory() {
 }
 
 async function saveMemory() {
-  if (!memoryFile) await setUpdateStatus("Mevcut sürüm: v" + CURRENT_VERSION);
-const runtimeVersionEl = document.querySelector(".version");
-if (runtimeVersionEl) runtimeVersionEl.textContent = "v" + CURRENT_VERSION;
-setUpdateStatus("v" + CURRENT_VERSION + " • güncelleme hazır");
-
-initMemory();
+  if (!memoryFile) await initMemory();
   await memoryFile.write(JSON.stringify(memory, null, 2));
 }
 
@@ -2056,7 +2077,7 @@ async function runAssistant() {
 }
 
 
-const CURRENT_VERSION = "0.9.0";
+const CURRENT_VERSION = "0.9.1";
 
 const UPDATE_FILES = ["app.bundle.js"];
 
@@ -2197,38 +2218,39 @@ async function checkRemoteVersion() {
 }
 
 async function updatePluginFromGitHub() {
-  if (updateButtonEl) updateButtonEl.disabled = true;
+  const btn = document.getElementById("updatePlugin");
+  const originalText = "Güncelle";
 
   try {
-    const remoteVersion = await checkRemoteVersion();
+    if (btn) btn.textContent = "Kontrol…";
+
+    const remoteVersion = (await fetchGithubFile("VERSION")).trim();
 
     if (compareVersions(remoteVersion, CURRENT_VERSION) <= 0) {
+      if (btn) btn.textContent = "Güncel";
       setStatus("✓ Güncel sürüm: v" + CURRENT_VERSION);
+      setTimeout(() => { if (btn) btn.textContent = originalText; }, 1400);
       return;
     }
 
+    if (btn) btn.textContent = "İndiriliyor…";
     const folder = await getWritablePluginFolder(false);
-
-    setUpdateStatus("Dosyalar indiriliyor...");
-
-    setUpdateStatus("Yeni bundle indiriliyor...");
     const bundleContent = await fetchGithubFile("app.bundle.js");
 
-    setUpdateStatus("Bundle kuruluyor...");
+    if (btn) btn.textContent = "Kuruluyor…";
     await writeTextFile(folder, "app.bundle.js", bundleContent);
 
-    setUpdateStatus("✓ v" + remoteVersion + " kuruldu • panel yenileniyor...");
-    setStatus("✓ KRALI DESIGN v" + remoteVersion + " güncellendi");
+    // Load & Watch burada bundle değişikliğini algılayıp paneli yeniden yükler.
+    // Reload gecikirse kullanıcıya görünür başarı durumu bırak.
+    if (btn) btn.textContent = "v" + remoteVersion;
+    setStatus("✓ v" + remoteVersion + " kuruldu");
   } catch (err) {
     console.error("Updater error:", err);
     const message = err && err.message ? err.message : String(err);
-    setUpdateStatus("Hata: " + message);
-    throw err;
-  } finally {
-    if (updateButtonEl) updateButtonEl.disabled = false;
+    if (btn) btn.textContent = "Tekrar Dene";
+    setStatus("Güncelleme hatası: " + message);
   }
 }
-
 
 async function guarded(fn) {
   try {

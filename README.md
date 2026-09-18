@@ -2,7 +2,15 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
-## v0.6.4
+## v0.6.5
+
+### Yeni tema
+- Gri ağırlıklı görünüm siyah tabanlı hale getirildi.
+- Ana vurgu rengi **#FF4141** oldu.
+- Primary/secondary butonlar siyah-gri, aksiyon ve güncelleme butonları kırmızı.
+- Hover/focus durumları #FF4141 ile uyumlu.
+- Hızlı Format ikonları, updater rozeti, input/select, checkbox ve kart sınırları yeni temaya uyarlandı.
+- Eski mavi/yeşil vurgu renkleri kaldırıldı.
 
 ### UI düzeltmesi
 - UXP içinde boş görünen CSS Grid yapısı kaldırıldı.
@@ -108,4 +116,4 @@ Panel sağ üstündeki **Sürümü Güncelle** butonunu kullan.
 
 UXP Developer Tool'da **Load & Watch** açık olmalıdır.
 
-v0.6.4 manifest değiştirmez; doğrudan paneldeki Sürümü Güncelle butonu ile alınabilir.nışını düzeltir.nd veya git pull ile al; sonrasında updater v2 kullanılacak.
+v0.6.5 manifest değiştirmez; paneldeki Sürümü Güncelle butonu ile alınabilir.n paneldeki Sürümü Güncelle butonu ile alınabilir.nışını düzeltir.nd veya git pull ile al; sonrasında updater v2 kullanılacak.

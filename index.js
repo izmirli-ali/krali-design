@@ -475,6 +475,174 @@ async function clearGuidesInternal() {
   if (doc.guides && doc.guides.length) doc.guides.removeAll();
 }
 
+
+const FORMAT_PRESETS = {
+  vertical: { name: "Dikey 9:16", width: 1080, height: 1920, safe: "reels" },
+  post45: { name: "Post 4:5", width: 1080, height: 1350, safe: "post45" },
+  square: { name: "Kare 1:1", width: 1080, height: 1080, safe: "square" },
+  horizontal: { name: "Yatay 16:9", width: 1920, height: 1080, safe: "wide169" }
+};
+
+function captureTopLayerGeometry(doc) {
+  const oldW = px(doc.width);
+  const oldH = px(doc.height);
+
+  return flattenTopLayers(doc).map((layer, index) => {
+    try {
+      const b = layerBounds(layer);
+      const w = b.right - b.left;
+      const h = b.bottom - b.top;
+      if (w <= 0 || h <= 0) return null;
+
+      return {
+        index,
+        name: layer.name,
+        centerX: ((b.left + b.right) / 2) / oldW,
+        centerY: ((b.top + b.bottom) / 2) / oldH,
+        width: w,
+        height: h
+      };
+    } catch (_) {
+      return null;
+    }
+  }).filter(Boolean);
+}
+
+async function duplicateActiveDocumentForFormat(formatName) {
+  const doc = getDoc();
+
+  if (typeof doc.duplicate === "function") {
+    const base = String(doc.title || "KRALI").replace(/\.[^/.]+$/, "");
+    const copy = await doc.duplicate(base + " - " + formatName);
+    if (copy) return copy;
+    return app.activeDocument;
+  }
+
+  await batchPlay(
+    [{
+      _obj: "duplicate",
+      _target: [{ _ref: "document", _enum: "ordinal", _value: "first" }],
+      name: formatName,
+      _options: { dialogOptions: "dontDisplay" }
+    }],
+    {}
+  );
+
+  return app.activeDocument;
+}
+
+async function resizeCanvasTo(width, height) {
+  const doc = getDoc();
+
+  if (typeof doc.resizeCanvas === "function") {
+    await doc.resizeCanvas(width, height, constants.AnchorPosition.MIDDLECENTER);
+    return;
+  }
+
+  await batchPlay(
+    [{
+      _obj: "canvasSize",
+      width: { _unit: "pixelsUnit", _value: width },
+      height: { _unit: "pixelsUnit", _value: height },
+      horizontal: { _enum: "horizontalLocation", _value: "center" },
+      vertical: { _enum: "verticalLocation", _value: "center" },
+      _options: { dialogOptions: "dontDisplay" }
+    }],
+    {}
+  );
+}
+
+async function applySmartGeometry(savedGeometry, oldWidth, oldHeight, newWidth, newHeight) {
+  const doc = getDoc();
+  const layers = flattenTopLayers(doc);
+
+  const scaleX = newWidth / oldWidth;
+  const scaleY = newHeight / oldHeight;
+  const uniformScale = Math.min(scaleX, scaleY);
+
+  for (const saved of savedGeometry) {
+    let layer = layers[saved.index];
+
+    if (!layer || normalizeText(layer.name) !== normalizeText(saved.name)) {
+      layer = layers.find(l => normalizeText(l.name) === normalizeText(saved.name));
+    }
+
+    if (!layer) continue;
+
+    try {
+      const before = layerBounds(layer);
+      const currentW = before.right - before.left;
+
+      if (currentW > 0) {
+        const targetW = saved.width * uniformScale;
+        const scalePct = (targetW / currentW) * 100;
+        await layer.scale(scalePct, scalePct, constants.AnchorPosition.MIDDLECENTER);
+      }
+
+      const after = layerBounds(layer);
+      const newCenterX = (after.left + after.right) / 2;
+      const newCenterY = (after.top + after.bottom) / 2;
+
+      const targetCenterX = saved.centerX * newWidth;
+      const targetCenterY = saved.centerY * newHeight;
+
+      await layer.translate(
+        targetCenterX - newCenterX,
+        targetCenterY - newCenterY
+      );
+    } catch (err) {
+      console.warn("Smart resize skipped layer:", saved.name, err);
+    }
+  }
+}
+
+async function quickFormat(key) {
+  const preset = FORMAT_PRESETS[key];
+  if (!preset) throw new Error("Format preset bulunamadı.");
+
+  const mode = document.getElementById("resizeMode").value || "smart";
+  const duplicateFirst = document.getElementById("duplicateBeforeResize").checked;
+  const safeAfter = document.getElementById("safeAfterResize").checked;
+
+  const sourceDoc = getDoc();
+  const oldWidth = px(sourceDoc.width);
+  const oldHeight = px(sourceDoc.height);
+  const geometry = mode === "smart" ? captureTopLayerGeometry(sourceDoc) : [];
+
+  setStatus(preset.name + " hazırlanıyor...");
+
+  await modal("Hızlı Format " + preset.name, async () => {
+    if (duplicateFirst) {
+      await duplicateActiveDocumentForFormat(preset.name);
+    }
+
+    await resizeCanvasTo(preset.width, preset.height);
+
+    if (mode === "smart") {
+      await applySmartGeometry(
+        geometry,
+        oldWidth,
+        oldHeight,
+        preset.width,
+        preset.height
+      );
+    }
+  });
+
+  if (safeAfter) {
+    await applySafePreset(preset.safe);
+  }
+
+  await refreshDocInfo();
+
+  setStatus(
+    "✓ " + preset.name +
+    (mode === "smart" ? " akıllı uyarlandı" : " canvas ölçüsü uygulandı") +
+    (duplicateFirst ? " • kopya belge" : "")
+  );
+}
+
+
 const SAFE_PRESETS = {
   reels: { name: "Reels 9:16", left: 0.0556, right: 0.1111, top: 0.1146, bottom: 0.1667 },
   story: { name: "Story 9:16", left: 0.0556, right: 0.0556, top: 0.13, bottom: 0.13 },
@@ -740,6 +908,10 @@ async function guarded(fn) {
 
 document.getElementById("updatePlugin").addEventListener("click", () => guarded(updatePluginFromGitHub));
 document.getElementById("refreshDoc").addEventListener("click", () => guarded(refreshDocInfo));
+
+document.querySelectorAll("[data-format]").forEach(btn => {
+  btn.addEventListener("click", () => guarded(() => quickFormat(btn.dataset.format)));
+});
 
 document.querySelectorAll("[data-safe]").forEach(btn => {
   btn.addEventListener("click", () => guarded(() => applySafePreset(btn.dataset.safe)));

@@ -243,3 +243,37 @@ select { margin-bottom: 7px; }
   .inlineForm { flex-wrap: wrap; }
   .compact { width: 100%; }
 }
+
+.formatMode {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 9px;
+}
+
+.formatMode select {
+  margin-bottom: 0;
+}
+
+.checkLine {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 26px;
+  color: #b7b7b7;
+  font-size: 10px;
+}
+
+.checkLine input {
+  width: auto;
+  min-height: 0;
+  margin: 0;
+}
+
+button small {
+  display: block;
+  margin-top: 2px;
+  color: #c2c2c2;
+  font-size: 8px;
+  font-weight: 500;
+}

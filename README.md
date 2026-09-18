@@ -2,6 +2,16 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
+### v0.10.1 — UI Polish
+- Güncelle butonu dar panelde de sağ üstte sabit tutuldu.
+- Güncelle kontrolü küçültülüp `↻ Güncelle` haline getirildi.
+- Yenile butonu küçük `↻` ikon kontrolüne çevrildi.
+- Hızlı Format oran ikonları daha kompakt hale getirildi.
+- Safe Zone 3 sütunlu kompakt grid oldu; isim ve oran ayrı satıra alındı.
+- Genel buton yüzeyleri koyulaştırıldı ve gri yoğunluğu azaltıldı.
+- Kart aralıkları ve padding değerleri küçültüldü.
+
+
 ### v0.10.0 — Workflow Tools
 - Yerleşim bölümüne 9 noktalı hizalama grid'i eklendi.
 - Hizalamada isteğe bağlı %5 güvenli kenar payı eklendi.

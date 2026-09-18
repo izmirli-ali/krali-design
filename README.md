@@ -2,6 +2,16 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
+### v0.9.0 — UI Refinement
+- Bozuk UXP pseudo-element kırmızı çizgileri kaldırıldı.
+- Güncelle butonu koyu temaya alındı; #FF4141 yalnızca vurgu olarak kullanılıyor.
+- Akıllı Uyarla / Canvas dropdown yerine segment seçim butonları eklendi.
+- Hızlı Format oran ikonları küçültüldü.
+- Safe Zone 3×2 kompakt grid yapısına geçti.
+- Aktif Belge kartında belge adı ve teknik bilgiler ayrıştırıldı.
+- Genel buton gri yoğunluğu azaltıldı, yüzeyler siyaha yaklaştırıldı.
+
+
 ### v0.8.1 — Final UI cleanup
 - Eski statik v0.7.0 etiketi kaldırıldı.
 - Üst sürüm etiketi runtime CURRENT_VERSION ile zorunlu eşlenir.

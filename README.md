@@ -2,6 +2,14 @@
 
 Photoshop için UXP tabanlı workflow hızlandırma paneli.
 
+### v0.10.2 — Quick Format cleanup
+- Aktif Belge kartı kaldırıldı; işlevsel aksiyon içermediği için panelde yer kaplamıyor.
+- Hızlı Format butonlarındaki 9:16 / 4:5 / 1:1 / 16:9 metinleri kaldırıldı.
+- Her format yalnızca kendi gerçek en-boy oranını temsil eden çerçeve ikonuyla gösteriliyor.
+- Tam çözünürlük bilgisi hover tooltip içinde korunuyor.
+- Hızlı Format alanı daha görsel ve kompakt hale getirildi.
+
+
 ### v0.10.1 — UI Polish
 - Güncelle butonu dar panelde de sağ üstte sabit tutuldu.
 - Güncelle kontrolü küçültülüp `↻ Güncelle` haline getirildi.

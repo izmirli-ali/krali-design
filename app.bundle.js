@@ -1,4 +1,4 @@
-// KRALI 100 YILLIK DENEYİM v0.11.6 — single-file runtime bundle
+// KRALI 100 YILLIK DENEYİM v0.11.7 — single-file runtime bundle
 (function () {
   const style = document.createElement("style");
   style.textContent = `* { box-sizing: border-box; }
@@ -1545,7 +1545,7 @@ input[type="checkbox"] {
 
   const v0116Style = document.createElement("style");
   v0116Style.textContent = `
-    /* v0.11.6 full-height responsive panel */
+    /* v0.11.7 full-height responsive panel */
     html,
     body{
       height:100% !important;
@@ -1588,7 +1588,7 @@ input[type="checkbox"] {
       <div class="topActions">
         <button id="placeAssetTop" class="assetTopBtn" title="Dosyadan Asset Ekle">📁</button>
         <button id="updatePlugin" class="updateBtn">↻ Güncelle</button>
-        <div class="version">v0.11.6</div>
+        <div class="version">v0.11.7</div>
       </div>
     </header>
 
@@ -2905,7 +2905,7 @@ async function runAssistant() {
 }
 
 
-const CURRENT_VERSION = "0.11.6";
+const CURRENT_VERSION = "0.11.7";
 
 const UPDATE_FILES = ["app.bundle.js"];
 
@@ -3171,4 +3171,5 @@ const runtimeVersionEl = document.querySelector(".version");
 if (runtimeVersionEl) runtimeVersionEl.textContent = "v" + CURRENT_VERSION;
 setStatus("KRALI 100 YILLIK DENEYİM v" + CURRENT_VERSION + " hazır");
 initMemory();
+
 
